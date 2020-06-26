@@ -1,0 +1,15 @@
+.card-height {
+    min-height: 250px;
+    height: 250px; /* cross-browser */
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.card:hover {
+    i {
+        transform: scale(1.2);
+        transition-duration: .4s;
+    }
+}

@@ -1,4 +1,4 @@
-<div class="header bg-gradient-primary pb-8 pt-md-6">
+<div class="header bg-gradient-default pb-8 pt-md-6">
   <div class="container-fluid">
     <div class="header-body">
       <!-- Card stats -->
@@ -34,32 +34,51 @@
   <div class="row">
     
     <div class="col mx-auto">
-       <div class="card bg-gradient-info shadow">
-        <div class="card-header bg-transparent">
-          <div class="row align-items-center">
-            
-            
-          </div>
-        </div>
+       <div class="card transforms card-height bg-gradient-success shadow clickable" data-toggle="modal" data-target="#joinQuizModal">
+        <h3 class="card-header bg-transparent mx-auto border-0 pt-5">
+          <i class="fas fa-check-circle fa-3x"></i>
+        </h3>
         <div class="card-body">
-
+          <p class="card-text text-center font-weight-bold">
+            Join a quiz with an ID provided by the QuizMaster.
+          </p>            
         </div>
       </div>
     </div>
 
-    <div class="col mx-auto">
-      <div class="card bg-gradient-success shadow">
-        <div class="card-header bg-transparent">
-          <div class="row align-items-center">
-
-          </div>
-        </div>
+    <div class="col transforms mx-auto">
+      <div class="card card-height bg-gradient-warning shadow clickable">
+        <h3 class="card-header bg-transparent mx-auto border-0 pt-5">
+          <i class="fas fa-list-alt fa-3x"></i>
+        </h3>
         <div class="card-body">
-
-        </div>
+            <p class="card-text text-center font-weight-bold">
+              Host a quiz for your friends. Customize questions and rounds.
+            </p>            
+          </div>
       </div>
     </div>
   </div>
+  
+  <div class="modal" id="joinQuizModal" tabindex="-1" role="dialog" aria-labelledby="joinQuizModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            ...
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
   <!-- <div class="row mt-5">
     <div class="col-xl-8 mb-5 mb-xl-0">
       <div class="card shadow">
@@ -282,4 +301,7 @@
       </div>
     </div>
   </div> -->
+
+  
+  
 </div>
