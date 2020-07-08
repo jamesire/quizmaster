@@ -31,7 +31,9 @@ import { ModalComponent } from 'src/app/modal/modal.component';
     IconsComponent,
     MapsComponent,
     ModalComponent
-  ]
+  ],
+  entryComponents: [ModalComponent]
+
 })
 
 export class AdminLayoutModule {}
