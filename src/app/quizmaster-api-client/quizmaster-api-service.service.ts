@@ -13,12 +13,12 @@ export class QuizmasterApiService {
   constructor(private http:HttpClient) { }
 
   async getRandomQuestion() {
-    var response = await this.http.get('quiz/random');
-    response.subscribe(result => {
-      return result;
-    })
+    var response = await this.http.get('quiz/random').toPromise();
+    // response.subscribe(result => {
+    //   return result;
+    // })
 
-    return response;
+    return response["quizQuestion"];
   }
 
 }
