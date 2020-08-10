@@ -15,12 +15,13 @@ import { ComponentsModule } from './components/components.module';
 import { BrowserModule } from '@angular/platform-browser';
 import { ClientInterceptorComponent } from './client-interceptor/client-interceptor.component';
 import { QuizmasterApiService } from './quizmaster-api-client/quizmaster-api-service.service';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { HostWaitingRoomComponent } from './pages/host-waiting-room/host-waiting-room.component';
 import { QuizComponent } from './pages/quiz/quiz.component';
 import { JoinQuizComponent } from './pages/join-quiz/join-quiz.component';
 import { WaitingRoomComponent } from './pages/waiting-room/waiting-room.component';
 import { HomeComponent } from './home/home.component';
+import { JoinQuizService } from './pages/join-quiz/join-quiz.service';
+import { WebsocketService } from './websocket/websocket.service';
 
 
 @NgModule({
@@ -33,14 +34,7 @@ import { HomeComponent } from './home/home.component';
     RouterModule,
     AppRoutingModule,
     BrowserModule,
-    HttpClientModule,
-    RouterModule.forRoot([
-      { path: '', component: DashboardComponent },
-      { path: 'joinQuiz', component: JoinQuizComponent }
-      // { path: 'waitingRoom', component: WaitingRoomComponent },
-      // { path: 'hostWaitingRoom', component: HostWaitingRoomComponent },
-      // { path: 'quiz', component: QuizComponent },
-    ])
+    HttpClientModule
   ],
   declarations: [
     AppComponent,
@@ -55,7 +49,9 @@ import { HomeComponent } from './home/home.component';
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: ClientInterceptorComponent, multi: true },
-    QuizmasterApiService
+    QuizmasterApiService,
+    JoinQuizService,
+    WebsocketService
   ],
   bootstrap: [AppComponent]
 })

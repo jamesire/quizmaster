@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { JoinQuizService } from './join-quiz.service';
 
 @Component({
   selector: 'app-join-quiz',
@@ -7,9 +8,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class JoinQuizComponent implements OnInit {
 
-  constructor() { }
+  constructor(private jqService: JoinQuizService) { }
 
   ngOnInit(): void {
+    this.jqService.messages.subscribe(msg => {
+      console.log(msg);
+    })
+
+    this.sendMessage();
+  }
+
+  sendMessage() {
+    this.jqService.sendMsg("Test message");
   }
 
 }

@@ -1,41 +1,41 @@
-<div class="header bg-gradient-default pb-8 pt-md-6">
-  <div class="container-fluid">
-    <div class="header-body">
-      <!-- Card stats -->
-      <div class="row">
-        <div class="mx-auto">
-          <div class="card card-stats mb-4 mb-xl-0">
-            <div class="card-body">
-              <div *ngIf="isLoaded" class="row">
-                <div class="col">
-                  <h5 class="card-title text-uppercase text-muted mb-0">Random Trivia...</h5>
-                  <span class="h2 font-weight-bold mb-0"
-                    [ngClass]="answerIsSelected && regenerateRandomQuestion()">{{randomQuestion.question}}</span>
-                </div>
+<div class=" pb-8 pt-md-6">
+<div class="container-fluid">
+  <div class="header-body">
+    <!-- Card stats -->
+    <div class="row">
+      <div class="mx-auto">
+        <div class="card card-stats mb-4 mb-xl-0">
+          <div class="card-body">
+            <div *ngIf="isLoaded" class="row">
+              <div class="col">
+                <h5 class="card-title text-uppercase text-muted mb-0">Random Trivia...</h5>
+                <span class="h2 font-weight-bold mb-0"
+                  [ngClass]="answerIsSelected && regenerateRandomQuestion()">{{randomQuestion.question}}</span>
               </div>
-              <div class="row mt-2">
-                <div class="col">
-                  <!-- <p class="mb-0 text-muted text-sm">
+            </div>
+            <div class="row mt-2">
+              <div class="col">
+                <!-- <p class="mb-0 text-muted text-sm">
                     <span class="text-nowrap">Answers/input down here maybe?</span>
                   </p> -->
-                  <div *ngFor="let answer of answers; let i = index;" class="btn-group btn-group-toggle w-50"
-                    ngbRadioGroup name="radioBasic" [(ngModel)]="model" [ngClass]="answerIsSelected && [makeOpaque]">
-                    <label ngbButtonLabel class="btn-primary btn-block m-1" [ngClass]="answerIsSelected && [css[i]]"
-                      [value]="[i]" (click)="checkAnswer(i)">
-                      {{answer.text}}
-                    </label>
-                  </div>
+                <div *ngFor="let answer of answers; let i = index;" class="btn-group btn-group-toggle w-50"
+                  ngbRadioGroup name="radioBasic" [(ngModel)]="model" [ngClass]="answerIsSelected && [makeOpaque]">
+                  <label ngbButtonLabel class="btn-primary btn-block m-1" [ngClass]="answerIsSelected && [css[i]]"
+                    [value]="[i]" (click)="checkAnswer(i)">
+                    {{answer.text}}
+                  </label>
                 </div>
-                <!-- <div class="ml-auto mr-3">
+              </div>
+              <!-- <div class="ml-auto mr-3">
                   <button class="btn btn-sm btn-primary">Submit</button>
                 </div> -->
-              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 </div>
 <div class="container-fluid mt--7">
   <div class="row">
@@ -101,17 +101,18 @@
     <div class="modal-body">
       <form>
         <div class="form-group">
-          <label for="quizId" class="p-1 border-bottom">Host a quick-fire quiz with 10 questions. Time limit is 60 seconds.</label>   
-          <br />     
-            <div ngbDropdown class="d-inline-block">
-              <button class="btn btn-secondary" id="dropdownBasic1" ngbDropdownToggle>Question Difficulty</button>
-              <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
-                <button ngbDropdownItem>Easy</button>
-                <button ngbDropdownItem>Medium</button>
-                <button ngbDropdownItem>Hard</button>
-                <button ngbDropdownItem>Random</button>
-              </div>
+          <label for="quizId" class="p-1 border-bottom">Host a quick-fire quiz with 10 questions. Time limit is 60
+            seconds.</label>
+          <br />
+          <div ngbDropdown class="d-inline-block">
+            <button class="btn btn-secondary" id="dropdownBasic1" ngbDropdownToggle>Question Difficulty</button>
+            <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+              <button ngbDropdownItem>Easy</button>
+              <button ngbDropdownItem>Medium</button>
+              <button ngbDropdownItem>Hard</button>
+              <button ngbDropdownItem>Random</button>
             </div>
+          </div>
         </div>
       </form>
     </div>
@@ -119,6 +120,7 @@
       <button type="button" class="btn btn-primary" routerLink="/joinQuiz">Create</button>
     </div>
   </ng-template>
+</div>
   <!-- <div class="row mt-5">
     <div class="col-xl-8 mb-5 mb-xl-0">
       <div class="card shadow">
@@ -341,4 +343,3 @@
       </div>
     </div>
   </div> -->
-</div>

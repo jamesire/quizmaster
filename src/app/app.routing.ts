@@ -5,6 +5,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component';
+import { JoinQuizComponent } from './pages/join-quiz/join-quiz.component';
 
 const routes: Routes =[
   {
@@ -32,6 +33,10 @@ const routes: Routes =[
   }, {
     path: '**',
     redirectTo: 'dashboard'
+  },
+  {
+    path: 'joinQuiz',
+    component: JoinQuizComponent
   }
 ];
 
