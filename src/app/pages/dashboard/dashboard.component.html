@@ -80,14 +80,19 @@
         <div class="form-group">
           <label for="quizId">Enter the Quiz ID provided by the Quiz Master.</label>
           <div class="input-group">
-            <input type="text" class="form-control" placeholder="Quiz ID" aria-label="Quiz ID"
+            <input #quizId type="text" class="form-control" placeholder="Quiz ID" aria-label="Quiz ID"
+              aria-describedby="basic-addon">
+          </div>
+          <label for="quizId">Enter your name.</label>
+          <div class="input-group">
+            <input #username type="text" class="form-control" placeholder="Quiz ID" aria-label="Quiz ID"
               aria-describedby="basic-addon">
           </div>
         </div>
       </form>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-outline-dark" (click)="modal.close('Save click')">Join</button>
+      <button type="button" class="btn btn-outline-dark" (click)="joinQuiz(quizId.value, username.value, joinQuizModal)">Join</button>
     </div>
   </ng-template>
   <!-- Todo: Componentise this -->

@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { Component, NgModule, ViewChild } from '@angular/core';
 import { ModalComponent } from 'src/app/modal/modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -33,7 +34,7 @@ export class DashboardComponent {
   private subscription: Subscription;
   private timeoutInAction: boolean = false;
   
-  constructor(private modalService: NgbModal, private quizMasterApiClient:QuizmasterApiService) 
+  constructor(private modalService: NgbModal, private quizMasterApiClient: QuizmasterApiService, private router: Router) 
   { 
   }
 
@@ -64,6 +65,7 @@ export class DashboardComponent {
         this.closeResult = `Closed with: ${result}`;
     }, (reason) => {
         console.log(reason);
+        return 0;
     });
   }
 
@@ -109,5 +111,15 @@ export class DashboardComponent {
 
     this.timeoutInAction = true;
     return this.makeOpaque;
+  }
+
+  joinQuiz(quizId, username, joinQuizModal)
+  {
+    console.log("Entered " + quizId + " User: " + username)
+    this.modalService.dismissAll();
+
+    
+
+    this.router.navigate(['/joinQuiz']);
   }
 }
