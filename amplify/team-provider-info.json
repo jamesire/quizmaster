@@ -1,0 +1,15 @@
+{
+    "dev": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-quizmaster-dev-155312-authRole",
+            "UnauthRoleArn": "arn:aws:iam::569597086748:role/amplify-quizmaster-dev-155312-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::569597086748:role/amplify-quizmaster-dev-155312-authRole",
+            "Region": "eu-west-1",
+            "DeploymentBucketName": "amplify-quizmaster-dev-155312-deployment",
+            "UnauthRoleName": "amplify-quizmaster-dev-155312-unauthRole",
+            "StackName": "amplify-quizmaster-dev-155312",
+            "StackId": "arn:aws:cloudformation:eu-west-1:569597086748:stack/amplify-quizmaster-dev-155312/0c478400-df07-11ea-abfc-0ad4772b7a1e",
+            "AmplifyAppId": "d7514a03x6rz5"
+        }
+    }
+}
