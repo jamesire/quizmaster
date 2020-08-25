@@ -1,34 +1,35 @@
 <div class=" pb-8 pt-md-6">
-<div class="container-fluid">
-  <div class="header-body">
-    <!-- Card stats -->
-    <div class="row">
-      <div class="mx-auto">
-        <div class="card card-stats mb-4 mb-xl-0">
-          <div class="card-body">
-            <div *ngIf="isLoaded" class="row">
-              <div class="col">
-                <h5 class="card-title text-uppercase text-muted mb-0">Random Trivia...</h5>
-                <span class="h2 font-weight-bold mb-0"
-                  [ngClass]="answerIsSelected && regenerateRandomQuestion()">{{randomQuestion.question}}</span>
-              </div>
-            </div>
-            <div class="row mt-2">
-              <div class="col">
-                <!-- <p class="mb-0 text-muted text-sm">
-                    <span class="text-nowrap">Answers/input down here maybe?</span>
-                  </p> -->
-                <div *ngFor="let answer of answers; let i = index;" class="btn-group btn-group-toggle w-50"
-                  ngbRadioGroup name="radioBasic" [(ngModel)]="model" [ngClass]="answerIsSelected && [makeOpaque]">
-                  <label ngbButtonLabel class="btn-primary btn-block m-1" [ngClass]="answerIsSelected && [css[i]]"
-                    [value]="[i]" (click)="checkAnswer(i)">
-                    {{answer.text}}
-                  </label>
+  <div class="container-fluid">
+    <div class="header-body">
+      <!-- Card stats -->
+      <div class="row">
+        <div class="mx-auto">
+          <div class="card card-stats mb-4 mb-xl-0">
+            <div class="card-body">
+              <div *ngIf="isLoaded" class="row">
+                <div class="col">
+                  <h5 class="card-title text-uppercase text-muted mb-0">Random Trivia...</h5>
+                  <span class="h2 font-weight-bold mb-0"
+                    [ngClass]="answerIsSelected && regenerateRandomQuestion()">{{randomQuestion.question}}</span>
                 </div>
               </div>
-              <!-- <div class="ml-auto mr-3">
+              <div class="row mt-2">
+                <div class="col">
+                  <!-- <p class="mb-0 text-muted text-sm">
+                    <span class="text-nowrap">Answers/input down here maybe?</span>
+                  </p> -->
+                  <div *ngFor="let answer of answers; let i = index;" class="btn-group btn-group-toggle w-50"
+                    ngbRadioGroup name="radioBasic" [(ngModel)]="model" [ngClass]="answerIsSelected && [makeOpaque]">
+                    <label ngbButtonLabel class="btn-primary btn-block m-1" [ngClass]="answerIsSelected && [css[i]]"
+                      [value]="[i]" (click)="checkAnswer(i)">
+                      {{answer.text}}
+                    </label>
+                  </div>
+                </div>
+                <!-- <div class="ml-auto mr-3">
                   <button class="btn btn-sm btn-primary">Submit</button>
                 </div> -->
+              </div>
             </div>
           </div>
         </div>
@@ -36,13 +37,12 @@
     </div>
   </div>
 </div>
-</div>
 <div class="container-fluid mt--7">
   <div class="row">
     <div class="col transforms mx-auto" data-toggle="modal" data-target="#joinQuizModal"
-      (click)="openJoinQuizModal(joinQuizModal)">
-      <div class="card card-height bg-gradient-success shadow clickable">
-        <h3 class="card-header bg-transparent mx-auto border-0 pt-5">
+      (click)="openModal(joinQuizModal)">
+      <div class="card card-height bg-gradient-success shadow clickable bleed">
+        <h3 class="card-header bg-transparent mx-auto border-0 pt-7">
           <i class="fas fa-check-circle fa-3x"></i>
         </h3>
         <div class="card-body">
@@ -54,9 +54,9 @@
     </div>
 
     <div class="col transforms mx-auto" data-toggle="modal" data-target="#hostQuizModal"
-      (click)="openHostQuizModal(hostQuizModal)">
-      <div class="card card-height bg-gradient-warning shadow clickable">
-        <h3 class="card-header bg-transparent mx-auto border-0 pt-5">
+      (click)="openModal(hostQuizModal)">
+      <div class="card card-height bg-gradient-warning shadow clickable bleed">
+        <h3 class="card-header bg-transparent mx-auto border-0 pt-7">
           <i class="fas fa-list-alt fa-3x"></i>
         </h3>
         <div class="card-body">
@@ -92,7 +92,8 @@
       </form>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-outline-dark" (click)="joinQuiz(quizId.value, username.value, joinQuizModal)">Join</button>
+      <button type="button" class="btn btn-outline-dark"
+        (click)="joinQuiz(quizId.value, username.value, joinQuizModal)">Join</button>
     </div>
   </ng-template>
   <!-- Todo: Componentise this -->
@@ -110,23 +111,49 @@
             seconds.</label>
           <br />
           <div ngbDropdown class="d-inline-block">
-            <button class="btn btn-secondary" id="dropdownBasic1" ngbDropdownToggle>Question Difficulty</button>
-            <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
-              <button ngbDropdownItem>Easy</button>
-              <button ngbDropdownItem>Medium</button>
-              <button ngbDropdownItem>Hard</button>
-              <button ngbDropdownItem>Random</button>
+            <label for="quizId" class="p-1 border-bottom">Difficulty</label>
+            <button class="btn btn-secondary" id="dropdown" ngbDropdownToggle>{{selectedDifficulty.value}}</button>
+            <div ngbDropdownMenu aria-labelledby="dropdown">
+              <button ngbDropdownItem (click)="updateQuestionDifficulty(0)">Any</button>
+              <button ngbDropdownItem (click)="updateQuestionDifficulty(1)">Easy</button>
+              <button ngbDropdownItem (click)="updateQuestionDifficulty(2)">Medium</button>
+              <button ngbDropdownItem (click)="updateQuestionDifficulty(3)">Hard</button>
             </div>
+            <br />
+            <label class="p-1 border-bottom">Username</label>
+            <input #hostUsername />
           </div>
         </div>
       </form>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-primary" routerLink="/joinQuiz">Create</button>
+      <button type="button" class="btn btn-primary" (click)="hostQuiz(hostUsername.value)">Create</button>
+    </div>
+  </ng-template>
+  <ng-template #showPartyModal let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Your Quiz ID is {{quizId}}</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form>
+        <div class="form-group">
+          <label>Waiting for People to Join...</label>
+          <div *ngFor="let person of party;">
+            {{person}}
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <!-- <button type="button" class="btn btn-outline-dark"
+        (click)="">Join</button> -->
     </div>
   </ng-template>
 </div>
-  <!-- <div class="row mt-5">
+<!-- <div class="row mt-5">
     <div class="col-xl-8 mb-5 mb-xl-0">
       <div class="card shadow">
         <div class="card-header border-0">

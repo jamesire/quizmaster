@@ -3,20 +3,20 @@ let http = require("http").Server(app);
 let io = require("socket.io")(http);
 
 io.on("connection", socket => {
-  // Log whenever a user connects
-  console.log("user connected");
+  socket.on('join', function(room) { 
+    console.log('joining room', room);
+    socket.join(room); 
+  })
 
-  // Log whenever a client disconnects from our websocket server
-  socket.on("disconnect", function() {
-    console.log("user disconnected");
-  });
+  socket.on('leave', function(room) {  
+      console.log('leaving quiz', room);
+      socket.leave(room); 
+  })
 
-  // When we receive a 'message' event from our client, print out
-  // the contents of that message and then echo it back to our client
-  // using `io.emit()`
-  socket.on("message", message => {
-    console.log("Message Received: " + message);
-    io.emit("message", { type: "new-message", text: message });
+  socket.on('send', function(data) {
+      console.log("user " + data.username + " has joined quiz " + data.quizId);
+      socket.join(data.quizId);
+      io.sockets.in(data.quizId).emit('send', data.username);
   });
 });
 

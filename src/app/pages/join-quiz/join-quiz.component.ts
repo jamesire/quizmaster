@@ -19,7 +19,7 @@ export class JoinQuizComponent implements OnInit {
   }
 
   sendMessage() {
-    this.jqService.sendMsg("Test message");
+   
   }
 
 }

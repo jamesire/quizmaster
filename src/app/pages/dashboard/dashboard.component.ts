@@ -7,7 +7,13 @@ import { Question } from 'src/app/models/Question';
 import { QuizmasterApiService } from 'src/app/quizmaster-api-client/quizmaster-api-service.service';
 import { isSyntheticPropertyOrListener } from '@angular/compiler/src/render3/util';
 import { ɵHttpInterceptingHandler } from '@angular/common/http';
-import { interval, Subscription } from 'rxjs';
+import { interval, Subscription, Subject } from 'rxjs';
+import { PartyMemberService } from 'src/app/party-member/party-member.service';
+
+interface SelectedDifficulty {
+  value: string,
+  index: number
+}
 
 @NgModule({
   declarations: [
@@ -23,28 +29,50 @@ export class DashboardComponent {
 
   public showJoinQuizModal: boolean = false;
   public showHostQuizModal: boolean = false;
+  public showPartyModal: boolean = false;
   public randomQuestion: Question;
   public answers: Answer[];
   public isLoaded: boolean = false;
   public answerIsSelected: boolean = false;
+  public selectedDifficulty: SelectedDifficulty;
   public css: string[] = [];
+  public quizId: string;
+  public partyMembers: string[] = [
+    "John",
+    "Mary",
+    "Steve",
+    "Ash"
+  ]
+  public party: string[] = [];
+  public readonly difficulties: string[] = [
+    "Any",
+    "Easy",
+    "Medium",
+    "Hard"
+  ];
   public readonly makeOpaque: string = "change-opacity-on-answer";
-  @ViewChild('joinQuizModal') modal: ModalComponent;
+  @ViewChild('showPartyModal') showPartyModalContent: any;
   private closeResult = '';  
   private subscription: Subscription;
   private timeoutInAction: boolean = false;
+
   
-  constructor(private modalService: NgbModal, private quizMasterApiClient: QuizmasterApiService, private router: Router) 
+  constructor(private modalService: NgbModal, private quizMasterApiClient: QuizmasterApiService, private router: Router, private partyMemberService: PartyMemberService) 
   { 
+    var defaultIndex = 0;
+    var defaultDifficulty = this.difficulties[defaultIndex];
+
+    this.selectedDifficulty = {
+      value: defaultDifficulty,
+      index: defaultIndex
+    }
   }
 
   async ngOnInit() {
-    // this.subscription = this.source.subscribe(() => {
-    //   if(this.answerIsSelected) {
-    //     this.generateRandomQuestion();
-    //   }
-    // });
-
+    this.partyMemberService.partyMembers.subscribe(msg => {
+      this.party.push(msg);
+      console.log(msg + " has joined...")
+    })
     await this.generateRandomQuestion();
   }
 
@@ -59,23 +87,18 @@ export class DashboardComponent {
     this.isLoaded = true;
   }
 
-  openJoinQuizModal(content) {
+  openModal(content) {
     // and use the reference from the component itself
     this.modalService.open(content).result.then((result) => {
         this.closeResult = `Closed with: ${result}`;
     }, (reason) => {
         console.log(reason);
-        return 0;
     });
   }
 
-  openHostQuizModal(content) {
-    // and use the reference from the component itself
-    this.modalService.open(content).result.then((result) => {
-        this.closeResult = `Closed with: ${result}`;
-    }, (reason) => {
-        console.log(reason);
-    });
+  updateQuestionDifficulty(difficulty: number) {
+    this.selectedDifficulty.index = difficulty;
+    this.selectedDifficulty.value = this.difficulties[difficulty];
   }
 
   setAnswerChoices() {
@@ -88,9 +111,14 @@ export class DashboardComponent {
     possibleAnswers.push({text: this.randomQuestion.correctAnswer, isCorrect: true});
 
     // shuffle answers
-    for (let i = possibleAnswers.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [possibleAnswers[i], possibleAnswers[j]] = [possibleAnswers[j], possibleAnswers[i]];
+    if(possibleAnswers.length > 2) {
+      for (let i = possibleAnswers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [possibleAnswers[i], possibleAnswers[j]] = [possibleAnswers[j], possibleAnswers[i]];
+      }
+    }
+    else if(possibleAnswers[0].text === "False") {
+      [possibleAnswers[0], possibleAnswers[1]] = [possibleAnswers[1], possibleAnswers[0]];
     }
 
     this.answers = possibleAnswers;
@@ -113,13 +141,38 @@ export class DashboardComponent {
     return this.makeOpaque;
   }
 
-  joinQuiz(quizId, username, joinQuizModal)
+  async joinQuiz(quizId, username, joinQuizModal)
   {
-    console.log("Entered " + quizId + " User: " + username)
     this.modalService.dismissAll();
 
-    
+    var response = await this.quizMasterApiClient.joinQuiz(quizId, username);
 
-    this.router.navigate(['/joinQuiz']);
+    var message = {
+      username: username,
+      quizId: quizId
+    };
+
+    this.partyMemberService.joinQuiz(username, quizId);
+    //this.router.navigate(['/joinQuiz']);
+  }
+
+  async hostQuiz(username: string) {
+    
+    var response: any = await this.quizMasterApiClient.hostQuiz(username, this.selectedDifficulty.index);
+    this.modalService.dismissAll();
+    
+    if(response.statusCode === 200) {
+  
+      var message = {
+        username: username,
+        quizId: response.quizId
+      };
+  
+      //this.router.navigate(['/joinQuiz']);
+      this.quizId = response.quizId;
+      this.showPartyModal = true;
+      this.openModal(this.showPartyModalContent);
+      this.partyMemberService.joinQuiz(username, response.quizId);
+    }
   }
 }

@@ -18,10 +18,10 @@ import { QuizmasterApiService } from './quizmaster-api-client/quizmaster-api-ser
 import { HostWaitingRoomComponent } from './pages/host-waiting-room/host-waiting-room.component';
 import { QuizComponent } from './pages/quiz/quiz.component';
 import { JoinQuizComponent } from './pages/join-quiz/join-quiz.component';
-import { WaitingRoomComponent } from './pages/waiting-room/waiting-room.component';
 import { HomeComponent } from './home/home.component';
 import { JoinQuizService } from './pages/join-quiz/join-quiz.service';
 import { WebsocketService } from './websocket/websocket.service';
+import { PartyMemberService } from './party-member/party-member.service';
 
 
 @NgModule({
@@ -42,7 +42,6 @@ import { WebsocketService } from './websocket/websocket.service';
     AuthLayoutComponent,
     ClientInterceptorComponent,
     JoinQuizComponent,
-    WaitingRoomComponent,
     HostWaitingRoomComponent,
     QuizComponent,
     HomeComponent
@@ -51,7 +50,8 @@ import { WebsocketService } from './websocket/websocket.service';
     { provide: HTTP_INTERCEPTORS, useClass: ClientInterceptorComponent, multi: true },
     QuizmasterApiService,
     JoinQuizService,
-    WebsocketService
+    WebsocketService,
+    PartyMemberService
   ],
   bootstrap: [AppComponent]
 })

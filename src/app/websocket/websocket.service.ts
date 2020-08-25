@@ -18,8 +18,8 @@ export class WebsocketService {
     this.socket = io(environment.SOCKET_IO_URL);
 
     let observable = new Observable(observer => {
-      this.socket.on('message', (data) => {
-        console.log("Received message from websocket server");
+      this.socket.on('send', (data) => {
+        console.log("Received message from websocket server: " + data);
         observer.next(data);
       })
       return () => {
@@ -29,54 +29,19 @@ export class WebsocketService {
 
     let observer = {
       next: (data: Object) => {
-        this.socket.emit('message', JSON.stringify(data));
+        this.socket.emit('send', data);
       }
     }
 
     return Rx.Subject.create(observer, observable);
   }
 
-  connectHost(): Rx.Subject<MessageEvent> {
-    this.socket = io(environment.SOCKET_IO_URL);
+  joinRoom(username, quizId) {
+    var data = {
+      username,
+      quizId
+    };
 
-    let observable = new Observable(observer => {
-      this.socket.on('message', (data) => {
-        console.log("Received message from websocket server");
-        observer.next(data);
-      })
-      return () => {
-        this.socket.disconnect();
-      }
-    })
-
-    let observer = {
-      next: (data: Object) => {
-        this.socket.emit('message', JSON.stringify(data));
-      }
-    }
-
-    return Rx.Subject.create(observer, observable);
-  }
-
-  connectGuest(): Rx.Subject<MessageEvent> {
-    this.socket = io(environment.SOCKET_IO_URL);
-
-    let observable = new Observable(observer => {
-      this.socket.on('message', (data) => {
-        console.log("Received message from websocket server");
-        observer.next(data);
-      })
-      return () => {
-        this.socket.disconnect();
-      }
-    })
-
-    let observer = {
-      next: (data: Object) => {
-        this.socket.emit('message', JSON.stringify(data));
-      }
-    }
-
-    return Rx.Subject.create(observer, observable);
+    this.socket.emit('send', data);
   }
 }

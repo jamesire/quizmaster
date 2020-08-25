@@ -21,4 +21,22 @@ export class QuizmasterApiService {
     return response["quizQuestion"];
   }
 
+  async joinQuiz(quizId: string, username: string) {
+    var body = {
+      quizId: quizId,
+      username: username
+    }
+
+    return await this.http.post('quiz/joinQuiz', body).toPromise();
+  }
+
+  async hostQuiz(username: string, difficulty: number) {
+    var body = {
+      username: username,
+      difficulty: difficulty
+    }
+
+    return await this.http.post('quiz/hostQuiz', body).toPromise();
+  }
+
 }

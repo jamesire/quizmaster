@@ -1,6 +1,6 @@
 .card-height {
-    min-height: 250px;
-    height: 250px; /* cross-browser */
+    min-height: 350px;
+    height: 350px; /* cross-browser */
 }
 
 .clickable {
@@ -38,4 +38,8 @@
     transition-duration: 2s;
     opacity: 0;
     visibility: hidden;
+}
+
+.bleed {
+    top: 10%; 
 }
