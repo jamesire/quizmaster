@@ -4,7 +4,9 @@
 
 export const environment = {
   production: false,
-  QUIZMASTER_API_URL: "https://localhost:44326/",
+  QUIZMASTER_API_URL: "http://quizmasterapi-dev.eu-west-1.elasticbeanstalk.com/",
+  //SOCKET_IO_URL: "http://quizmasterplayermanagement-env.eba-4caag4vh.eu-west-1.elasticbeanstalk.com/",
+  //SOCKET_IO_URL: "http://quizmaster-player-service.s3-website-eu-west-1.amazonaws.com",
   SOCKET_IO_URL: "http://localhost:5000"
 };
 

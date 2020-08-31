@@ -2,6 +2,8 @@ let app = require("express")();
 let http = require("http").Server(app);
 let io = require("socket.io")(http);
 
+io.set('origins', '*:*');
+
 io.on("connection", socket => {
   socket.on('join', function(room) { 
     console.log('joining room', room);

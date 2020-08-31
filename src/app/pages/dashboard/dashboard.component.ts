@@ -141,7 +141,7 @@ export class DashboardComponent {
     return this.makeOpaque;
   }
 
-  async joinQuiz(quizId, username, joinQuizModal)
+  async joinQuiz(quizId, username)
   {
     this.modalService.dismissAll();
 
@@ -152,6 +152,7 @@ export class DashboardComponent {
       quizId: quizId
     };
 
+    this.openModal(this.showPartyModalContent);
     this.partyMemberService.joinQuiz(username, quizId);
     //this.router.navigate(['/joinQuiz']);
   }
