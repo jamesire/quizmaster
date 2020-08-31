@@ -37,6 +37,7 @@ export class DashboardComponent {
   public selectedDifficulty: SelectedDifficulty;
   public css: string[] = [];
   public quizId: string;
+  public userIsHost: boolean = false;
   public partyMembers: string[] = [
     "John",
     "Mary",
@@ -55,6 +56,7 @@ export class DashboardComponent {
   private closeResult = '';  
   private subscription: Subscription;
   private timeoutInAction: boolean = false;
+  private username: string;
 
   
   constructor(private modalService: NgbModal, private quizMasterApiClient: QuizmasterApiService, private router: Router, private partyMemberService: PartyMemberService) 
@@ -70,8 +72,22 @@ export class DashboardComponent {
 
   async ngOnInit() {
     this.partyMemberService.partyMembers.subscribe(msg => {
-      this.party.push(msg);
-      console.log(msg + " has joined...")
+      if(msg.action === "join") {
+        //this.party.push(msg.username);
+        this.party = msg.partyList;
+        console.log("Dashboard message: " + msg.username + " has joined...");
+      }
+      else if(msg.action === "ppp") {
+        console.log("Dashboard message: thing said ppp");
+      }
+      else if (msg.action === "leave") {
+        this.party = msg.partyList;
+        // var index = this.party.indexOf(msg.username);
+        // if(index > -1) {
+        //   this.party.splice(index, 1);
+        //   console.log("Dashboard message: " + msg.username + " has left...")
+        // }
+      }
     })
     await this.generateRandomQuestion();
   }
@@ -93,6 +109,10 @@ export class DashboardComponent {
         this.closeResult = `Closed with: ${result}`;
     }, (reason) => {
         console.log(reason);
+        if(reason === "Cross click")
+        {
+          this.partyMemberService.leaveQuiz(this.username, this.quizId);
+        }
     });
   }
 
@@ -141,23 +161,31 @@ export class DashboardComponent {
     return this.makeOpaque;
   }
 
-  async joinQuiz(quizId, username, joinQuizModal)
-  {
-    this.modalService.dismissAll();
+  startQuiz() {
+    
+  }
 
+  async joinQuiz(quizId, username, joinQuizModal) {
+    this.modalService.dismissAll();
+    
     var response = await this.quizMasterApiClient.joinQuiz(quizId, username);
+    
+    this.username = username;
+    this.quizId = quizId;
 
     var message = {
       username: username,
       quizId: quizId
     };
 
+    this.showPartyModal = true;
+    this.openModal(this.showPartyModalContent);
     this.partyMemberService.joinQuiz(username, quizId);
     //this.router.navigate(['/joinQuiz']);
   }
 
   async hostQuiz(username: string) {
-    
+    this.username = username;
     var response: any = await this.quizMasterApiClient.hostQuiz(username, this.selectedDifficulty.index);
     this.modalService.dismissAll();
     
@@ -171,6 +199,7 @@ export class DashboardComponent {
       //this.router.navigate(['/joinQuiz']);
       this.quizId = response.quizId;
       this.showPartyModal = true;
+      this.userIsHost = true;
       this.openModal(this.showPartyModalContent);
       this.partyMemberService.joinQuiz(username, response.quizId);
     }

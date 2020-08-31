@@ -23,8 +23,27 @@ export class PartyMemberService {
       quizId
     }
 
-    this.wsService.joinRoom(username, quizId);
+    //this.wsService.joinRoom(username, quizId);
 
-    this.partyMembers.next(username);
+    var partyMembersData = {
+      username: username,
+      quizId: quizId,
+      action: 'join'
+    }
+
+    this.partyMembers.next(partyMembersData);
   }
+
+  leaveQuiz(username, quizId) {
+    this.wsService.disconnect();
+    
+    var partyMembersData = {
+      username: username,
+      quizId: quizId,
+      action: 'leave'
+    }
+
+    this.partyMembers.next(partyMembersData);
+  }
+
 }
