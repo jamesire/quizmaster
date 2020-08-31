@@ -64,12 +64,19 @@ io.on("connection", socket => {
       {
         connectedUsers.set(data.quizId, [])
       }
+      
+      var users = connectedUsers.get(data.quizId);
+      users.push(data.username)
+      connectedUsers.set(data.quizId, users);
 
       var emitData = {
         username: data.username,
         action: 'join',
         partyList: connectedUsers.get(data.quizId)
       }
+
+      console.log(socket.username + " has joined quiz " + socket.quizId + ".")
+      console.log(socket.quizId + " contains: " + connectedUsers.get(data.quizId))
         
       io.sockets.in(data.quizId).emit('send', emitData);
     }
@@ -85,6 +92,9 @@ io.on("connection", socket => {
       if(!users) {
         connectedUsers.delete(socket.quizId);
       }
+
+      console.log(socket.username + " has left quiz " + socket.quizId + ".")
+      console.log(socket.quizId + " contains: " + connectedUsers.get(data.quizId))
       
       socket.leaveAll();
       var emitData = {
