@@ -109,6 +109,13 @@ io.on("connection", socket => {
       socket.username = "";
       socket.quizId = "";
     }
+    else if(data.action === 'start') 
+    {
+      var emitData = {
+        action: 'start',
+      }
+      io.sockets.in(socket.quizId).emit('send', emitData);
+    }
     else 
     {
       console.log("Unspecified action");

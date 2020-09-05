@@ -46,4 +46,13 @@ export class PartyMemberService {
     this.partyMembers.next(partyMembersData);
   }
 
+  startQuiz(quizId) {
+    var startQuizData = {
+      quizId: quizId,
+      action: 'start'
+    }
+  
+    this.partyMembers.next(startQuizData);
+  }
+
 }

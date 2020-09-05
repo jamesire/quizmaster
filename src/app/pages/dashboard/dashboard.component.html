@@ -18,7 +18,7 @@
                   <!-- <p class="mb-0 text-muted text-sm">
                     <span class="text-nowrap">Answers/input down here maybe?</span>
                   </p> -->
-                  <div *ngFor="let answer of answers; let i = index;" class="btn-group btn-group-toggle w-50"
+                  <div *ngFor="let answer of randomQuestion.allAnswers; let i = index;" class="btn-group btn-group-toggle w-50"
                     ngbRadioGroup name="radioBasic" [(ngModel)]="model" [ngClass]="answerIsSelected && [makeOpaque]">
                     <label ngbButtonLabel class="btn-primary btn-block m-1" [ngClass]="answerIsSelected && [css[i]]"
                       [value]="[i]" (click)="checkAnswer(i)">
