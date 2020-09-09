@@ -123,29 +123,6 @@ export class DashboardComponent {
     this.selectedDifficulty.value = this.difficulties[difficulty];
   }
 
-  // setAnswerChoices() {
-  //   let possibleAnswers: Answer[] = [];
-
-  //   this.randomQuestion.incorrectAnswers.forEach(answer => {
-  //     possibleAnswers.push({text: answer, isCorrect: false})
-  //   })
-
-  //   possibleAnswers.push({text: this.randomQuestion.correctAnswer, isCorrect: true});
-
-  //   // shuffle answers
-  //   if(possibleAnswers.length > 2) {
-  //     for (let i = possibleAnswers.length - 1; i > 0; i--) {
-  //       const j = Math.floor(Math.random() * (i + 1));
-  //       [possibleAnswers[i], possibleAnswers[j]] = [possibleAnswers[j], possibleAnswers[i]];
-  //     }
-  //   }
-  //   else if(possibleAnswers[0].text === "False") {
-  //     [possibleAnswers[0], possibleAnswers[1]] = [possibleAnswers[1], possibleAnswers[0]];
-  //   }
-
-  //   this.answers = possibleAnswers;
-  // }
-
   checkAnswer(i: number) {
     this.answerIsSelected = true;
     return this.randomQuestion.allAnswers[i].isCorrect;

@@ -2,10 +2,14 @@ import { Answer } from "./Answer";
 import { Question } from "./Question";
 
 export class QuestionHelper {
-    static setAnswerChoices(...questions: Question[]) {
+    static setAnswerChoices(questions) {
         let possibleAnswers: Answer[];
-        
-        questions.forEach(question => {
+
+        if(!Array.isArray(questions)) {
+            questions = [ questions ];
+        }
+
+        questions.map(question => {
             possibleAnswers = [];
             question.incorrectAnswers.forEach(answer => {
                 possibleAnswers.push({text: answer, isCorrect: false})

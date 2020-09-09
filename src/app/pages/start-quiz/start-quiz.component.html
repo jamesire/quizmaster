@@ -1,12 +1,53 @@
-<div class=" pb-8 pt-md-6">
-    <div class="container-fluid">
-      <div class="header-body">
-        <!-- Card stats -->
-        <div class="row">
-          <div class="mx-auto">
-            
+<div class="pb-8 pt-md-6">
+  <div class="container pb-4">
+    <div class="row">
+      <div class="col text-center">
+        <div class="icon icon-shape bg-warning text-white rouded-square shadow"></div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="header-body">
+      <!-- Card stats -->
+      <div class="row">
+        <div class="mx-auto">
+          <div class="card card-stats mb-4 mb-xl-0">
+            <div class="card-body">
+              <div *ngIf="isLoaded" class="row">
+                <div class="col">
+                  <h5 class="card-title text-uppercase text-muted mb-0">Question {{questionIndex + 1}}.</h5>
+                  <span class="h2 font-weight-bold mb-0"
+                    [ngClass]="answerIsSelected && regenerateQuestion()">{{quizQuestions[questionIndex].question}}</span>
+                </div>
+              </div>
+              <div class="row mt-2">
+                <div class="col">
+                  <!-- <p class="mb-0 text-muted text-sm">
+                        <span class="text-nowrap">Answers/input down here maybe?</span>
+                      </p> -->
+                  <div *ngFor="let answer of quizQuestions[questionIndex].allAnswers; let i = index;"
+                    class="btn-group btn-group-toggle w-50" ngbRadioGroup name="radioBasic" [(ngModel)]="model"
+                    [ngClass]="answerIsSelected && [makeOpaque]">
+                    <label ngbButtonLabel class="btn-primary btn-block m-1" [ngClass]="answerIsSelected && [css[i]]"
+                      [value]="[i]" (click)="checkAnswer(i)">
+                      {{answer.text}}
+                    </label>
+                  </div>
+                </div>
+                <!-- <div class="ml-auto mr-3">
+                      <button class="btn btn-sm btn-primary">Submit</button>
+                    </div> -->
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid pt-6">
+    <div class="row">
+      <div class="col text-center">
+        <button type="button" class="btn btn-primary">{{score}}</button>
       </div>
     </div>
   </div>
