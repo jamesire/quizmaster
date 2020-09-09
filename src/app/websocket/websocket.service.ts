@@ -36,12 +36,16 @@ export class WebsocketService {
     return Rx.Subject.create(observer, observable);
   }
 
-  joinRoom(username, quizId) {
-    var data = {
-      username,
-      quizId
-    };
+  // joinRoom(username, quizId) {
+  //   var data = {
+  //     username,
+  //     quizId
+  //   };
 
-    this.socket.emit('send', data);
+  //   this.socket.emit('send', data);
+  // }
+
+  disconnect() {
+    this.socket.emit('disconnect');
   }
 }

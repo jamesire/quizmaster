@@ -9,6 +9,7 @@ import { isSyntheticPropertyOrListener } from '@angular/compiler/src/render3/uti
 import { ɵHttpInterceptingHandler } from '@angular/common/http';
 import { interval, Subscription, Subject } from 'rxjs';
 import { PartyMemberService } from 'src/app/party-member/party-member.service';
+import { QuestionHelper } from 'src/app/models/QuestionHelper';
 
 interface SelectedDifficulty {
   value: string,
@@ -37,12 +38,8 @@ export class DashboardComponent {
   public selectedDifficulty: SelectedDifficulty;
   public css: string[] = [];
   public quizId: string;
-  public partyMembers: string[] = [
-    "John",
-    "Mary",
-    "Steve",
-    "Ash"
-  ]
+  public userIsHost: boolean = false;
+  public showSpinner = false;
   public party: string[] = [];
   public readonly difficulties: string[] = [
     "Any",
@@ -55,6 +52,7 @@ export class DashboardComponent {
   private closeResult = '';  
   private subscription: Subscription;
   private timeoutInAction: boolean = false;
+  private username: string;
 
   
   constructor(private modalService: NgbModal, private quizMasterApiClient: QuizmasterApiService, private router: Router, private partyMemberService: PartyMemberService) 
@@ -70,17 +68,37 @@ export class DashboardComponent {
 
   async ngOnInit() {
     this.partyMemberService.partyMembers.subscribe(msg => {
-      this.party.push(msg);
-      console.log(msg + " has joined...")
+      if(msg.action === "join") {
+        //this.party.push(msg.username);
+        this.party = msg.partyList;
+        console.log("Dashboard message: " + msg.username + " has joined...");
+      }
+      else if(msg.action === "ppp") {
+        console.log("Dashboard message: thing said ppp");
+      }
+      else if (msg.action === "leave") {
+        this.party = msg.partyList;
+        // var index = this.party.indexOf(msg.username);
+        // if(index > -1) {
+        //   this.party.splice(index, 1);
+        //   console.log("Dashboard message: " + msg.username + " has left...")
+        // }
+      }
+      else if(msg.action === "start")
+      {
+        this.router.navigate(['/startQuiz']);
+        this.modalService.dismissAll();
+      }
     })
     await this.generateRandomQuestion();
   }
 
   async generateRandomQuestion() {
-    this.randomQuestion = await this.quizMasterApiClient.getRandomQuestion();
-    this.setAnswerChoices();
+    var questionList = await this.quizMasterApiClient.getRandomQuestions();
+    this.randomQuestion = questionList[0];
+    this.randomQuestion = QuestionHelper.setAnswerChoices(this.randomQuestion)[0];
     
-    this.answers.forEach((ans, index) => {
+    this.randomQuestion.allAnswers.forEach((ans, index) => {
       this.css[index] = ans.isCorrect ? "correct-answer" : "incorrect-answer";
     })
     this.answerIsSelected = false;
@@ -93,6 +111,10 @@ export class DashboardComponent {
         this.closeResult = `Closed with: ${result}`;
     }, (reason) => {
         console.log(reason);
+        if(reason === "Cross click")
+        {
+          this.partyMemberService.leaveQuiz(this.username, this.quizId);
+        }
     });
   }
 
@@ -101,32 +123,9 @@ export class DashboardComponent {
     this.selectedDifficulty.value = this.difficulties[difficulty];
   }
 
-  setAnswerChoices() {
-    let possibleAnswers: Answer[] = [];
-
-    this.randomQuestion.incorrectAnswers.forEach(answer => {
-      possibleAnswers.push({text: answer, isCorrect: false})
-    })
-
-    possibleAnswers.push({text: this.randomQuestion.correctAnswer, isCorrect: true});
-
-    // shuffle answers
-    if(possibleAnswers.length > 2) {
-      for (let i = possibleAnswers.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [possibleAnswers[i], possibleAnswers[j]] = [possibleAnswers[j], possibleAnswers[i]];
-      }
-    }
-    else if(possibleAnswers[0].text === "False") {
-      [possibleAnswers[0], possibleAnswers[1]] = [possibleAnswers[1], possibleAnswers[0]];
-    }
-
-    this.answers = possibleAnswers;
-  }
-
   checkAnswer(i: number) {
     this.answerIsSelected = true;
-    return this.answers[i].isCorrect;
+    return this.randomQuestion.allAnswers[i].isCorrect;
   }
 
   regenerateRandomQuestion() {
@@ -141,24 +140,31 @@ export class DashboardComponent {
     return this.makeOpaque;
   }
 
-  async joinQuiz(quizId, username)
-  {
-    this.modalService.dismissAll();
+  startQuiz() {
+    this.partyMemberService.startQuiz(this.quizId);
+  }
 
+  async joinQuiz(quizId, username) {
+    this.modalService.dismissAll();
+    
     var response = await this.quizMasterApiClient.joinQuiz(quizId, username);
+    
+    this.username = username;
+    this.quizId = quizId;
 
     var message = {
       username: username,
       quizId: quizId
     };
 
+    this.userIsHost = false;
+    this.showPartyModal = true;
     this.openModal(this.showPartyModalContent);
     this.partyMemberService.joinQuiz(username, quizId);
-    //this.router.navigate(['/joinQuiz']);
   }
 
   async hostQuiz(username: string) {
-    
+    this.username = username;
     var response: any = await this.quizMasterApiClient.hostQuiz(username, this.selectedDifficulty.index);
     this.modalService.dismissAll();
     
@@ -169,9 +175,9 @@ export class DashboardComponent {
         quizId: response.quizId
       };
   
-      //this.router.navigate(['/joinQuiz']);
       this.quizId = response.quizId;
       this.showPartyModal = true;
+      this.userIsHost = true;
       this.openModal(this.showPartyModalContent);
       this.partyMemberService.joinQuiz(username, response.quizId);
     }

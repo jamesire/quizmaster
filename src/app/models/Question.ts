@@ -1,3 +1,5 @@
+import { Answer } from "./Answer";
+
 export interface Question {
     category: string;
     type: string;
@@ -5,4 +7,5 @@ export interface Question {
     question: string;
     correctAnswer: string;
     incorrectAnswers: string[];
+    allAnswers: Answer[];
 }

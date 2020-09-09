@@ -22,6 +22,7 @@ import { HomeComponent } from './home/home.component';
 import { JoinQuizService } from './pages/join-quiz/join-quiz.service';
 import { WebsocketService } from './websocket/websocket.service';
 import { PartyMemberService } from './party-member/party-member.service';
+import { StartQuizComponent } from './pages/start-quiz/start-quiz.component';
 
 
 @NgModule({
@@ -44,7 +45,8 @@ import { PartyMemberService } from './party-member/party-member.service';
     JoinQuizComponent,
     HostWaitingRoomComponent,
     QuizComponent,
-    HomeComponent
+    HomeComponent,
+    StartQuizComponent
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: ClientInterceptorComponent, multi: true },
