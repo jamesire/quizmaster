@@ -11,7 +11,6 @@
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start",
     "devStart": "nodemon server.js",
     "postinstall": "ng build --aot --prod",
-    "heroku-postbuild": "ng build --prod"
   },
   "private": true,
   "dependencies": {
