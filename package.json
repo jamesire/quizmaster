@@ -9,13 +9,16 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start",
-    "devStart": "nodemon server.js"
+    "devStart": "nodemon server.js",
+    "postinstall": "ng build --aot --prod"
   },
   "private": true,
   "dependencies": {
     "@angular/animations": "9.0.5",
+    "@angular/cli": "9.0.5",
     "@angular/common": "9.0.5",
     "@angular/compiler": "9.0.5",
+    "@angular/compiler-cli": "9.0.5",
     "@angular/core": "9.0.5",
     "@angular/forms": "9.0.5",
     "@angular/http": "7.2.16",
@@ -34,10 +37,12 @@
     "ngx-clipboard": "13.0.0",
     "ngx-toastr": "12.0.0",
     "nouislider": "13.1.1",
+    "path": "^0.12.7",
     "rxjs": "6.5.4",
     "rxjs-compat": "^6.6.2",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
+    "typescript": "3.7.5",
     "zone.js": "0.10.2"
   },
   "devDependencies": {
@@ -49,6 +54,7 @@
     "@types/jasminewd2": "2.0.8",
     "@types/node": "13.7.7",
     "codelyzer": "5.2.1",
+    "enhanced-resolve": "^3.3.0",
     "jasmine-core": "3.5.0",
     "jasmine-spec-reporter": "4.2.1",
     "karma": "4.4.1",
@@ -63,5 +69,9 @@
     "tslint": "6.0.0",
     "typescript": "3.7.5",
     "webpack": "^4.44.1"
+  },
+  "engine": {
+    "node": "12.18.4",
+    "npm": "6.14.5"
   }
 }
