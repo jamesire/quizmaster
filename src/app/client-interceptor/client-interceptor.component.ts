@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-client-interceptor',
+  templateUrl: './client-interceptor.component.html'
 })
 export class ClientInterceptorComponent implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {

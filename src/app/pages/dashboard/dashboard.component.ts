@@ -16,16 +16,15 @@ interface SelectedDifficulty {
   index: number
 }
 
-@NgModule({
-  declarations: [
-    ModalComponent
-  ]
-})
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
+// @NgModule({
+//   declarations: [ ModalComponent ]
+// })
 export class DashboardComponent {
 
   public showJoinQuizModal: boolean = false;

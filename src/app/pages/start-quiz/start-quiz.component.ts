@@ -11,8 +11,8 @@ import { QuestionHelper } from 'src/app/models/QuestionHelper';
   styleUrls: ['./start-quiz.component.scss']
 })
 export class StartQuizComponent implements OnInit {
-  private questionIndex: number = 0;
   private timeoutInAction: boolean = false;
+  public  questionIndex: number = 0;
   public readonly makeOpaque: string = "change-opacity-on-answer";
   public isLoaded: boolean = false;
   public answerIsSelected: boolean = false;

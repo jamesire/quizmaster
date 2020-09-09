@@ -41,7 +41,7 @@ import { StartQuizComponent } from './pages/start-quiz/start-quiz.component';
     AppComponent,
     AdminLayoutComponent,
     AuthLayoutComponent,
-    ClientInterceptorComponent,
+    //ClientInterceptorComponent,
     JoinQuizComponent,
     HostWaitingRoomComponent,
     QuizComponent,
