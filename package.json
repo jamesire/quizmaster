@@ -71,7 +71,7 @@
     "typescript": "3.7.5",
     "webpack": "^4.44.1"
   },
-  "engine": {
+  "engines": {
     "node": "12.18.1",
     "npm": "6.14.5"
   }
