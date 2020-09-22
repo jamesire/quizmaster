@@ -10,7 +10,7 @@
     "e2e": "ng e2e",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start",
     "devStart": "nodemon server.js",
-    "postinstall": "npm run ng build -- --aot --prod"
+    "postinstall": "npm run ng build -- --prod"
   },
   "private": true,
   "dependencies": {
