@@ -35,19 +35,17 @@ const routes: Routes =[
     path: '**',
     redirectTo: 'dashboard'
   },
-  {
-    path: 'startQuiz',
-    component: StartQuizComponent
-  }
+  // {
+  //   path: 'startQuiz',
+  //   component: StartQuizComponent
+  // }
 ];
 
 @NgModule({
   imports: [
     CommonModule,
     BrowserModule,
-    RouterModule.forRoot(routes,{
-      useHash: true
-    })
+    RouterModule.forRoot(routes)
   ],
   exports: [
   ],

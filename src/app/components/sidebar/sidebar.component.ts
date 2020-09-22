@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, NgModule, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
 declare interface RouteInfo {
@@ -21,6 +22,9 @@ export const ROUTES: RouteInfo[] = [
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss']
+})
+@NgModule({
+  imports: [ CommonModule ]
 })
 export class SidebarComponent implements OnInit {
 

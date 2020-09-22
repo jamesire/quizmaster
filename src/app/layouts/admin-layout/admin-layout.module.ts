@@ -29,7 +29,8 @@ import { ModalComponent } from 'src/app/modal/modal.component';
     TablesComponent,
     IconsComponent,
     MapsComponent,
-    ModalComponent
+    ModalComponent,
+    DashboardComponent
   ],
   entryComponents: [ModalComponent]
 

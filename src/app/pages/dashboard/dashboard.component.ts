@@ -10,6 +10,8 @@ import { ɵHttpInterceptingHandler } from '@angular/common/http';
 import { interval, Subscription, Subject } from 'rxjs';
 import { PartyMemberService } from 'src/app/party-member/party-member.service';
 import { QuestionHelper } from 'src/app/models/QuestionHelper';
+import { CommonModule } from '@angular/common';  
+import { BrowserModule } from '@angular/platform-browser';
 
 interface SelectedDifficulty {
   value: string,
@@ -22,9 +24,10 @@ interface SelectedDifficulty {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-// @NgModule({
-//   declarations: [ ModalComponent ]
-// })
+@NgModule({
+  imports: [ CommonModule ],
+  declarations: [ ModalComponent ]
+})
 export class DashboardComponent {
 
   public showJoinQuizModal: boolean = false;

@@ -1,14 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgModule, OnInit } from '@angular/core';
 import { QuizmasterApiService } from 'src/app/quizmaster-api-client/quizmaster-api-service.service';
 import { Router } from '@angular/router';
 import { PartyMemberService } from 'src/app/party-member/party-member.service';
 import { Question } from 'src/app/models/Question';
 import { QuestionHelper } from 'src/app/models/QuestionHelper';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-start-quiz',
   templateUrl: './start-quiz.component.html',
   styleUrls: ['./start-quiz.component.scss']
+})
+@NgModule ({
+  imports: [ CommonModule ]
 })
 export class StartQuizComponent implements OnInit {
   private timeoutInAction: boolean = false;
