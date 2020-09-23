@@ -24,10 +24,7 @@ interface SelectedDifficulty {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-@NgModule({
-  imports: [ CommonModule ],
-  declarations: [ ModalComponent ]
-})
+
 export class DashboardComponent {
 
   public showJoinQuizModal: boolean = false;
