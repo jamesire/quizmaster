@@ -7,9 +7,7 @@ import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
   selector: 'app-modal',
   templateUrl: './modal.component.html'
 })
-@NgModule({
-  imports: [ CommonModule ]
-})
+
 export class ModalComponent implements OnInit {
   @ViewChild('joinQuizModal') content: any;
   closeResult = '';
