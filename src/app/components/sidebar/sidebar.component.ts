@@ -23,9 +23,7 @@ export const ROUTES: RouteInfo[] = [
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss']
 })
-@NgModule({
-  imports: [ CommonModule ]
-})
+
 export class SidebarComponent implements OnInit {
 
   public menuItems: any[];

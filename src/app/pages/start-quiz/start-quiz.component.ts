@@ -11,9 +11,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './start-quiz.component.html',
   styleUrls: ['./start-quiz.component.scss']
 })
-@NgModule ({
-  imports: [ CommonModule ]
-})
+
 export class StartQuizComponent implements OnInit {
   private timeoutInAction: boolean = false;
   public  questionIndex: number = 0;
