@@ -41,7 +41,13 @@
 }
 
 .bleed {
-    top: 10%; 
+    top: 10%;
+}
+
+.timer-shape {
+    width: 48px;
+    height: 48px;
+    transition: background-color .4s;
 }
 
 #overlay {
