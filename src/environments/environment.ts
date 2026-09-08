@@ -4,10 +4,12 @@
 
 export const environment = {
   production: false,
-  // QUIZMASTER_API_URL: "https://localhost:44326/",
-  // SOCKET_IO_URL: "http://localhost:5000/"
-  QUIZMASTER_API_URL: "http://quizmasterapi-dev.eu-west-1.elasticbeanstalk.com/",
-  SOCKET_IO_URL: "http://ec2-34-251-10-172.eu-west-1.compute.amazonaws.com:5000/",
+  // Socket.IO is served from the same origin as this app (see server.js),
+  // so no URL is needed - leave blank and the client defaults to same-origin.
+  SOCKET_IO_URL: '',
+  // Trivia questions are fetched directly from the Open Trivia DB - no
+  // backend of our own is needed just to proxy a public, CORS-enabled API.
+  OPEN_TRIVIA_DB_URL: 'https://opentdb.com/api.php',
 };
 
 /*

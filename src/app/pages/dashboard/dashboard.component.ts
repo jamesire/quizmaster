@@ -67,26 +67,36 @@ export class DashboardComponent {
 
   async ngOnInit() {
     this.partyMemberService.partyMembers.subscribe(msg => {
-      if(msg.action === "join") {
-        //this.party.push(msg.username);
+      if(msg.action === "hosted") {
+        // Server generated our quiz ID - now we can show the party modal.
+        this.quizId = msg.quizId;
         this.party = msg.partyList;
-        console.log("Dashboard message: " + msg.username + " has joined...");
+        this.userIsHost = true;
+        this.showPartyModal = true;
+        this.openModal(this.showPartyModalContent);
       }
-      else if(msg.action === "ppp") {
-        console.log("Dashboard message: thing said ppp");
+      else if(msg.action === "join") {
+        this.party = msg.partyList;
+        if(!this.showPartyModal && msg.username === this.username) {
+          // This is our own join being confirmed by the server.
+          this.showPartyModal = true;
+          this.openModal(this.showPartyModalContent);
+        }
+        console.log("Dashboard message: " + msg.username + " has joined...");
       }
       else if (msg.action === "leave") {
         this.party = msg.partyList;
-        // var index = this.party.indexOf(msg.username);
-        // if(index > -1) {
-        //   this.party.splice(index, 1);
-        //   console.log("Dashboard message: " + msg.username + " has left...")
-        // }
       }
       else if(msg.action === "start")
       {
         this.router.navigate(['/startQuiz']);
         this.modalService.dismissAll();
+      }
+      else if(msg.action === "error")
+      {
+        this.modalService.dismissAll();
+        console.error("Dashboard message: " + msg.message);
+        alert(msg.message);
       }
     })
     await this.generateRandomQuestion();
@@ -143,42 +153,25 @@ export class DashboardComponent {
     this.partyMemberService.startQuiz(this.quizId);
   }
 
-  async joinQuiz(quizId, username) {
+  joinQuiz(quizId, username) {
     this.modalService.dismissAll();
-    
-    var response = await this.quizMasterApiClient.joinQuiz(quizId, username);
-    
+
     this.username = username;
     this.quizId = quizId;
-
-    var message = {
-      username: username,
-      quizId: quizId
-    };
-
     this.userIsHost = false;
-    this.showPartyModal = true;
-    this.openModal(this.showPartyModalContent);
+
+    // The party modal opens once the server confirms the join (see the
+    // "join"/"error" cases in the ngOnInit subscription above).
     this.partyMemberService.joinQuiz(username, quizId);
   }
 
-  async hostQuiz(username: string) {
-    this.username = username;
-    var response: any = await this.quizMasterApiClient.hostQuiz(username, this.selectedDifficulty.index);
+  hostQuiz(username: string) {
     this.modalService.dismissAll();
-    
-    if(response.statusCode === 200) {
-  
-      var message = {
-        username: username,
-        quizId: response.quizId
-      };
-  
-      this.quizId = response.quizId;
-      this.showPartyModal = true;
-      this.userIsHost = true;
-      this.openModal(this.showPartyModalContent);
-      this.partyMemberService.joinQuiz(username, response.quizId);
-    }
+
+    this.username = username;
+
+    // The party modal opens once the server assigns a quiz ID (see the
+    // "hosted" case in the ngOnInit subscription above).
+    this.partyMemberService.hostQuiz(username, this.selectedDifficulty.index);
   }
 }

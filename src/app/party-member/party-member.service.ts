@@ -17,6 +17,16 @@ export class PartyMemberService {
     })
   }
 
+  hostQuiz(username, difficulty) {
+    var data = {
+      username,
+      difficulty,
+      action: 'host'
+    }
+
+    this.partyMembers.next(data);
+  }
+
   joinQuiz(username, quizId) {
     var data = {
       username,
