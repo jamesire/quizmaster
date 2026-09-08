@@ -30,9 +30,14 @@ export class StartQuizComponent implements OnInit, OnDestroy {
   public partyList: string[] = [];
   public scores: { [username: string]: number } = {};
   public username: string;
+  public loadError: string = null;
+  public loadErrorRetryable: boolean = false;
   private quizId: string;
   private timerHandle: any;
   private subscription: Subscription;
+  private retryHandle: any;
+  private retryAttempts: number = 0;
+  private readonly maxAutoRetries: number = 3;
 
   constructor(private route: ActivatedRoute, private router: Router, private partyMemberService: PartyMemberService) { }
 
@@ -55,6 +60,8 @@ export class StartQuizComponent implements OnInit, OnDestroy {
         this.partyList = msg.partyList;
         this.scores = msg.scores;
         this.isLoaded = true;
+        this.loadError = null;
+        this.retryAttempts = 0;
         this.startGameTimer(msg.startedAt);
       }
       else if (msg.action === 'scores' && msg.quizId === this.quizId) {
@@ -62,6 +69,15 @@ export class StartQuizComponent implements OnInit, OnDestroy {
       }
       else if (msg.action === 'error') {
         console.error('Start quiz message: ' + msg.message);
+        this.loadError = msg.message;
+        this.loadErrorRetryable = !!msg.retryable;
+
+        if (msg.retryable && this.retryAttempts < this.maxAutoRetries) {
+          this.retryAttempts++;
+          // 5s matches Open Trivia DB's own rate-limit window, and gives
+          // a host who's mid-click on "Start Quiz" time to finish.
+          this.retryHandle = setTimeout(() => this.retryLoad(), 5000);
+        }
       }
     });
 
@@ -73,6 +89,15 @@ export class StartQuizComponent implements OnInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+    if (this.retryHandle) {
+      clearTimeout(this.retryHandle);
+      this.retryHandle = null;
+    }
+  }
+
+  retryLoad() {
+    this.loadError = null;
+    this.partyMemberService.getQuestions(this.quizId, this.username);
   }
 
   checkAnswer(i: number) {

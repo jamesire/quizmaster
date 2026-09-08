@@ -181,7 +181,7 @@ io.on('connection', socket => {
         io.sockets.in(socket.quizId).emit('send', { action: 'start', quizId: socket.quizId, questions: quiz.questions });
       } catch (err) {
         console.error('Failed to fetch quiz questions: ' + err);
-        socket.emit('send', { action: 'error', message: 'Could not load quiz questions. Please try again.' });
+        socket.emit('send', { action: 'error', message: 'Could not load quiz questions. Please try again.', retryable: true });
       }
     }
     else if (data.action === 'getQuestions') {
@@ -196,7 +196,7 @@ io.on('connection', socket => {
         return;
       }
       if (!quiz.questions) {
-        socket.emit('send', { action: 'error', message: 'This quiz has not started yet.' });
+        socket.emit('send', { action: 'error', message: 'This quiz has not started yet.', retryable: true });
         return;
       }
 

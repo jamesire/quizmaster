@@ -41,6 +41,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public showSpinner = false;
   public party: string[] = [];
   public countdown: number = null;
+  public startingQuiz: boolean = false;
+  public startError: string = null;
+  public randomQuestionError: boolean = false;
   public readonly difficulties: string[] = [
     "Any",
     "Easy",
@@ -54,6 +57,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private timeoutInAction: boolean = false;
   private username: string;
   private countdownHandle: any;
+  private randomQuestionRetries: number = 0;
+  private randomQuestionRetryHandle: any;
+  private readonly maxAutoRetries: number = 3;
 
   
   constructor(private modalService: NgbModal, private quizMasterApiClient: QuizmasterApiService, private router: Router, private partyMemberService: PartyMemberService) 
@@ -98,13 +104,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
       else if(msg.action === "start")
       {
+        this.startingQuiz = false;
         this.beginCountdown();
       }
       else if(msg.action === "error")
       {
-        this.modalService.dismissAll();
         console.error("Dashboard message: " + msg.message);
-        alert(msg.message);
+
+        if (msg.retryable) {
+          // A transient failure fetching quiz questions - stay in the
+          // party modal and offer a retry instead of dumping the user
+          // back to the dashboard with just an alert.
+          this.startingQuiz = false;
+          this.startError = msg.message;
+        } else {
+          // Something retrying can't fix (bad quiz ID, username taken,
+          // quiz full, room gone) - nothing to show a spinner for.
+          this.modalService.dismissAll();
+          alert(msg.message);
+        }
       }
     })
     await this.generateRandomQuestion();
@@ -115,6 +133,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.subscription.unsubscribe();
     }
     this.clearCountdown();
+    if (this.randomQuestionRetryHandle) {
+      clearTimeout(this.randomQuestionRetryHandle);
+      this.randomQuestionRetryHandle = null;
+    }
   }
 
   async generateRandomQuestion() {
@@ -128,6 +150,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       })
       this.answerIsSelected = false;
       this.isLoaded = true;
+      this.randomQuestionError = false;
+      this.randomQuestionRetries = 0;
     } catch (err) {
       // Open Trivia DB rate-limits to ~1 request per 5 seconds per IP,
       // and this tile re-fetches on every dashboard visit - easy to hit
@@ -140,7 +164,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
       // driving a continuous render-throw loop on every change-detection
       // cycle for as long as the dashboard stayed mounted.
       console.error('Could not load a preview trivia question: ' + err);
+      this.randomQuestionError = true;
+
+      if (this.randomQuestionRetries < this.maxAutoRetries) {
+        this.randomQuestionRetries++;
+        // 5s matches Open Trivia DB's own rate-limit window - retrying
+        // sooner would just fail again.
+        this.randomQuestionRetryHandle = setTimeout(() => this.generateRandomQuestion(), 5000);
+      }
     }
+  }
+
+  retryRandomQuestion() {
+    this.randomQuestionRetries = 0;
+    this.generateRandomQuestion();
   }
 
   openModal(content) {
@@ -179,6 +216,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   startQuiz() {
+    this.startingQuiz = true;
+    this.startError = null;
     this.partyMemberService.startQuiz(this.quizId);
   }
 

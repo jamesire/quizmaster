@@ -16,6 +16,21 @@
         <div class="mx-auto">
           <div class="card card-stats mb-4 mb-xl-0">
             <div class="card-body">
+              <div *ngIf="!isLoaded && !isFinished && !loadError" class="row">
+                <div class="col text-center py-5">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                  </div>
+                  <p class="text-muted mt-3 mb-0">Loading questions…</p>
+                </div>
+              </div>
+              <div *ngIf="loadError" class="row">
+                <div class="col text-center py-5">
+                  <p class="text-danger mb-3">{{loadError}}</p>
+                  <button *ngIf="loadErrorRetryable" type="button" class="btn btn-primary" (click)="retryLoad()">Retry now</button>
+                  <button *ngIf="!loadErrorRetryable" type="button" class="btn btn-primary" (click)="backToDashboard()">Back to dashboard</button>
+                </div>
+              </div>
               <ng-container *ngIf="isLoaded && !isFinished">
                 <div class="row">
                   <div class="col">

@@ -6,6 +6,19 @@
         <div class="mx-auto">
           <div class="card card-stats mb-4 mb-xl-0">
             <div class="card-body">
+              <div *ngIf="!isLoaded && !randomQuestionError" class="row">
+                <div class="col text-center py-4">
+                  <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="randomQuestionError" class="row">
+                <div class="col text-center py-4">
+                  <p class="text-muted mb-2">Couldn't load trivia right now.</p>
+                  <button type="button" class="btn btn-sm btn-outline-primary" (click)="retryRandomQuestion()">Retry</button>
+                </div>
+              </div>
               <ng-container *ngIf="isLoaded">
                 <div class="row">
                   <div class="col">
@@ -141,11 +154,18 @@
     </div>
     <div class="modal-body">
       <form>
-        <div class="form-group" *ngIf="countdown === null">
+        <div class="form-group" *ngIf="countdown === null && !startingQuiz">
           <label>{{ userIsHost ? 'Waiting for People to Join...' : 'Waiting for host to start quiz...' }}</label>
           <div *ngFor="let person of party;">
             {{person}}
           </div>
+          <p *ngIf="startError" class="text-danger mt-2 mb-0">{{startError}}</p>
+        </div>
+        <div class="text-center py-3" *ngIf="startingQuiz">
+          <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+          <p class="text-muted mt-2 mb-0">Preparing your quiz…</p>
         </div>
         <div class="text-center" *ngIf="countdown !== null">
           <span class="h1 font-weight-bold">{{ countdown > 0 ? countdown : 'Go!' }}</span>
@@ -153,8 +173,8 @@
       </form>
     </div>
     <div class="modal-footer">
-      <button *ngIf="userIsHost && countdown === null" type="button" class="btn btn-primary"
-        (click)="startQuiz()">Start Quiz</button>
+      <button *ngIf="userIsHost && countdown === null && !startingQuiz" type="button" class="btn btn-primary"
+        (click)="startQuiz()">{{ startError ? 'Retry' : 'Start Quiz' }}</button>
     </div>
   </ng-template>
 </div>
