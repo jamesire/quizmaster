@@ -1,0 +1,14 @@
+// Sticky footer: keep the footer flush with the bottom of the page when
+// content is shorter than the viewport, and let it flow naturally after
+// content (never overlapping) when content is taller. .header wraps every
+// page's content and grows to fill the leftover space, pushing the footer
+// down to the bottom of the viewport at minimum.
+.main-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.header {
+    flex: 1 0 auto;
+}

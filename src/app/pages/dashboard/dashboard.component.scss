@@ -5,8 +5,13 @@
 
 @media (max-width: 575.98px) {
     .card-height {
-        min-height: 220px;
-        height: 220px;
+        // A fixed height here previously clipped the icon + text (it needs
+        // more room than a small fixed box allows once it wraps to 2-3
+        // lines on a narrow screen), spilling content out past the card's
+        // bottom edge. height: auto lets the card size to whatever its
+        // content actually needs, with min-height only as a floor.
+        height: auto;
+        min-height: 180px;
     }
 }
 
