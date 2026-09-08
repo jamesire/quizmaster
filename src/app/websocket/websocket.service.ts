@@ -15,7 +15,9 @@ export class WebsocketService {
   constructor() { }
 
   connect(): Rx.Subject<MessageEvent> {
-    this.socket = io(environment.SOCKET_IO_URL);
+    // An empty URL means "same origin as this page" - io() with no
+    // argument connects to whatever host served the app.
+    this.socket = environment.SOCKET_IO_URL ? io(environment.SOCKET_IO_URL) : io();
 
     let observable = new Observable(observer => {
       this.socket.on('send', (data) => {
