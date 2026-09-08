@@ -1,5 +1,5 @@
 import { Router } from '@angular/router';
-import { Component, NgModule, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { ModalComponent } from 'src/app/modal/modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Answer } from 'src/app/models/Answer';
@@ -25,7 +25,7 @@ interface SelectedDifficulty {
   styleUrls: ['./dashboard.component.scss']
 })
 
-export class DashboardComponent {
+export class DashboardComponent implements OnInit, OnDestroy {
 
   public showJoinQuizModal: boolean = false;
   public showHostQuizModal: boolean = false;
@@ -67,7 +67,14 @@ export class DashboardComponent {
   }
 
   async ngOnInit() {
-    this.partyMemberService.partyMembers.subscribe(msg => {
+    // Angular recreates this component every time you navigate back to
+    // /dashboard (e.g. "Back to dashboard" after a quiz), but
+    // partyMembers is a single app-wide Subject that outlives any one
+    // component - without unsubscribing in ngOnDestroy, every visit adds
+    // another subscriber that's never removed, and after a few rounds
+    // every socket message ends up triggering navigation/modals/alerts
+    // from several dead component instances at once.
+    this.subscription = this.partyMemberService.partyMembers.subscribe(msg => {
       if(msg.action === "hosted") {
         // Server generated our quiz ID - now we can show the party modal.
         this.quizId = msg.quizId;
@@ -100,6 +107,12 @@ export class DashboardComponent {
       }
     })
     await this.generateRandomQuestion();
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   async generateRandomQuestion() {

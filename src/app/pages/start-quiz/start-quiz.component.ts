@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { PartyMemberService } from 'src/app/party-member/party-member.service';
 import { Question } from 'src/app/models/Question';
 import { QuestionHelper } from 'src/app/models/QuestionHelper';
@@ -31,6 +32,7 @@ export class StartQuizComponent implements OnInit, OnDestroy {
   public username: string;
   private quizId: string;
   private timerHandle: any;
+  private subscription: Subscription;
 
   constructor(private route: ActivatedRoute, private router: Router, private partyMemberService: PartyMemberService) { }
 
@@ -42,7 +44,12 @@ export class StartQuizComponent implements OnInit, OnDestroy {
     // and hands it out on request - this is what keeps every player (and
     // a player who refreshes mid-quiz) seeing the same questions in the
     // same order, instead of each browser fetching its own random set.
-    this.partyMemberService.partyMembers.subscribe(msg => {
+    //
+    // partyMembers is a single app-wide Subject that outlives this
+    // component, so this subscription has to be torn down explicitly in
+    // ngOnDestroy - otherwise every quiz played in a session leaves
+    // another subscriber behind permanently.
+    this.subscription = this.partyMemberService.partyMembers.subscribe(msg => {
       if (msg.action === 'questions' && msg.quizId === this.quizId) {
         this.quizQuestions = QuestionHelper.setAnswerChoices(msg.questions);
         this.partyList = msg.partyList;
@@ -63,6 +70,9 @@ export class StartQuizComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.clearTimer();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   checkAnswer(i: number) {
