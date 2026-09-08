@@ -3,6 +3,13 @@
     height: 350px; /* cross-browser */
 }
 
+@media (max-width: 575.98px) {
+    .card-height {
+        min-height: 220px;
+        height: 220px;
+    }
+}
+
 .clickable {
     cursor: pointer;
 }
