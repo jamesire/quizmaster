@@ -11,7 +11,8 @@ const app = express();
 // level before Express's router ever sees them, so the two share a port
 // without colliding.
 const server = http.Server(app);
-const io = require('socket.io')(server);
+const { Server } = require('socket.io');
+const io = new Server(server);
 
 // In-memory store of quizzes currently being hosted.
 // quizId -> { difficulty: number, users: string[] }
