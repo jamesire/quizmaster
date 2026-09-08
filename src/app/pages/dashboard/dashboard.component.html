@@ -81,19 +81,19 @@
           <label for="quizId">Enter the Quiz ID provided by the Quiz Master.</label>
           <div class="input-group">
             <input #quizId type="text" class="form-control" placeholder="Quiz ID" aria-label="Quiz ID"
-              aria-describedby="basic-addon">
+              aria-describedby="basic-addon" (keyup.enter)="joinQuiz(quizId.value, username.value)">
           </div>
           <label for="quizId">Enter your name.</label>
           <div class="input-group">
-            <input #username type="text" class="form-control" placeholder="Quiz ID" aria-label="Quiz ID"
-              aria-describedby="basic-addon">
+            <input #username type="text" class="form-control" placeholder="Name" aria-label="Name" maxlength="12"
+              aria-describedby="basic-addon" (keyup.enter)="joinQuiz(quizId.value, username.value)">
           </div>
         </div>
       </form>
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-primary"
-        (click)="joinQuiz(quizId.value, username.value, joinQuizModal)">Join</button>
+        (click)="joinQuiz(quizId.value, username.value)">Join</button>
     </div>
   </ng-template>
   <!-- Todo: Componentise this -->
@@ -121,7 +121,7 @@
             </div>
             <br />
             <label class="p-1 border-bottom">Username</label>
-            <input #hostUsername />
+            <input #hostUsername maxlength="12" (keyup.enter)="hostQuiz(hostUsername.value)" />
           </div>
         </div>
       </form>
@@ -139,16 +139,19 @@
     </div>
     <div class="modal-body">
       <form>
-        <div class="form-group">
-          <label>Waiting for People to Join...</label>
+        <div class="form-group" *ngIf="countdown === null">
+          <label>{{ userIsHost ? 'Waiting for People to Join...' : 'Waiting for host to start quiz...' }}</label>
           <div *ngFor="let person of party;">
             {{person}}
           </div>
         </div>
+        <div class="text-center" *ngIf="countdown !== null">
+          <span class="h1 font-weight-bold">{{ countdown > 0 ? countdown : 'Go!' }}</span>
+        </div>
       </form>
     </div>
     <div class="modal-footer">
-      <button *ngIf="userIsHost" type="button" class="btn btn-primary"
+      <button *ngIf="userIsHost && countdown === null" type="button" class="btn btn-primary"
         (click)="startQuiz()">Start Quiz</button>
     </div>
   </ng-template>

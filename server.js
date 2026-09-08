@@ -92,7 +92,7 @@ io.on('connection', socket => {
   socket.on('send', async function (data) {
     if (data.action === 'host') {
       const quizId = generateQuizId();
-      quizzes.set(quizId, { difficulty: data.difficulty, users: [data.username], questions: null });
+      quizzes.set(quizId, { difficulty: data.difficulty, users: [data.username], questions: null, scores: {} });
 
       socket.username = data.username;
       socket.quizId = quizId;
@@ -195,7 +195,18 @@ io.on('connection', socket => {
         return;
       }
 
-      socket.emit('send', { action: 'questions', quizId: data.quizId, questions: quiz.questions });
+      socket.emit('send', { action: 'questions', quizId: data.quizId, questions: quiz.questions, partyList: quiz.users, scores: quiz.scores });
+    }
+    else if (data.action === 'submitScore') {
+      const quiz = quizzes.get(data.quizId);
+
+      if (!quiz) {
+        return;
+      }
+
+      quiz.scores[data.username] = data.score;
+
+      io.sockets.in(data.quizId).emit('send', { action: 'scores', quizId: data.quizId, scores: quiz.scores });
     }
     else {
       console.log('Unspecified action');

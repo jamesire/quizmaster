@@ -45,8 +45,21 @@
               </ng-container>
               <div *ngIf="isFinished" class="row">
                 <div class="col text-center">
-                  <h5 class="card-title text-uppercase text-muted mb-0">Time's up!</h5>
-                  <span class="h2 font-weight-bold mb-3 d-block">Final score: {{score}}</span>
+                  <h5 class="card-title text-uppercase text-muted mb-3">Time's up!</h5>
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Player</th>
+                        <th>Score</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let person of getSortedParty()" [class.font-weight-bold]="person === username">
+                        <td>{{person}}</td>
+                        <td>{{ scores[person] !== undefined ? scores[person] : 'Still playing…' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
                   <button type="button" class="btn btn-primary" (click)="backToDashboard()">Back to dashboard</button>
                 </div>
               </div>

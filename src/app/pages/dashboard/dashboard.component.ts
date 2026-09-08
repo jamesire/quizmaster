@@ -40,6 +40,7 @@ export class DashboardComponent {
   public userIsHost: boolean = false;
   public showSpinner = false;
   public party: string[] = [];
+  public countdown: number = null;
   public readonly difficulties: string[] = [
     "Any",
     "Easy",
@@ -89,8 +90,7 @@ export class DashboardComponent {
       }
       else if(msg.action === "start")
       {
-        this.router.navigate(['/startQuiz', this.quizId]);
-        this.modalService.dismissAll();
+        this.beginCountdown();
       }
       else if(msg.action === "error")
       {
@@ -151,6 +151,24 @@ export class DashboardComponent {
 
   startQuiz() {
     this.partyMemberService.startQuiz(this.quizId);
+  }
+
+  // Runs in the party modal for host and guests alike - everyone gets the
+  // same "start" broadcast at roughly the same time, so this gives a
+  // shared beat before dropping into the quiz instead of jumping in
+  // instantly.
+  private beginCountdown() {
+    this.countdown = 3;
+
+    const interval = setInterval(() => {
+      this.countdown--;
+
+      if (this.countdown <= 0) {
+        clearInterval(interval);
+        this.modalService.dismissAll();
+        this.router.navigate(['/startQuiz', this.quizId, this.username]);
+      }
+    }, 1000);
   }
 
   joinQuiz(quizId, username) {

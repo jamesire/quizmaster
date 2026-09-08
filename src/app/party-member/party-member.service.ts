@@ -74,4 +74,15 @@ export class PartyMemberService {
     this.partyMembers.next(data);
   }
 
+  submitScore(quizId, username, score) {
+    var data = {
+      quizId: quizId,
+      username: username,
+      score: score,
+      action: 'submitScore'
+    }
+
+    this.partyMembers.next(data);
+  }
+
 }

@@ -26,6 +26,9 @@ export class StartQuizComponent implements OnInit, OnDestroy {
   public quizQuestions: Question[];
   public css: string[] = [];
   public score: number = 0;
+  public partyList: string[] = [];
+  public scores: { [username: string]: number } = {};
+  public username: string;
   private quizId: string;
   private timerHandle: any;
 
@@ -33,6 +36,7 @@ export class StartQuizComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.quizId = this.route.snapshot.paramMap.get('quizId');
+    this.username = this.route.snapshot.paramMap.get('username');
 
     // The server generates one shared question set per quiz (on "start")
     // and hands it out on request - this is what keeps every player (and
@@ -41,8 +45,13 @@ export class StartQuizComponent implements OnInit, OnDestroy {
     this.partyMemberService.partyMembers.subscribe(msg => {
       if (msg.action === 'questions' && msg.quizId === this.quizId) {
         this.quizQuestions = QuestionHelper.setAnswerChoices(msg.questions);
+        this.partyList = msg.partyList;
+        this.scores = msg.scores;
         this.isLoaded = true;
         this.startGameTimer();
+      }
+      else if (msg.action === 'scores' && msg.quizId === this.quizId) {
+        this.scores = msg.scores;
       }
       else if (msg.action === 'error') {
         console.error('Start quiz message: ' + msg.message);
@@ -111,9 +120,14 @@ export class StartQuizComponent implements OnInit, OnDestroy {
   private endGame() {
     this.clearTimer();
     this.isFinished = true;
+    this.partyMemberService.submitScore(this.quizId, this.username, this.score);
   }
 
   backToDashboard() {
     this.router.navigate(['/dashboard']);
+  }
+
+  getSortedParty(): string[] {
+    return [...this.partyList].sort((a, b) => (this.scores[b] || 0) - (this.scores[a] || 0));
   }
 }

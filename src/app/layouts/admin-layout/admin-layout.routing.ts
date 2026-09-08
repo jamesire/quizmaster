@@ -10,7 +10,7 @@ import { StartQuizComponent } from 'src/app/pages/start-quiz/start-quiz.componen
 
 export const AdminLayoutRoutes: Routes = [
     { path: 'dashboard',      component: DashboardComponent },
-    { path: 'startQuiz/:quizId', component: StartQuizComponent },
+    { path: 'startQuiz/:quizId/:username', component: StartQuizComponent },
     { path: 'user-profile',   component: UserProfileComponent },
     { path: 'tables',         component: TablesComponent },
     { path: 'icons',          component: IconsComponent },
