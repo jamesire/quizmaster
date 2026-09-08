@@ -108,35 +108,41 @@
   <!-- Todo: Componentise this -->
   <ng-template #hostQuizModal let-modal>
     <div class="modal-header">
-      <h4 class="modal-title" id="modal-basic-title">Host a Quiz</h4>
+      <h4 class="modal-title" id="modal-basic-title"><i class="fas fa-list-alt text-warning mr-2"></i>Host a Quiz</h4>
       <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
     <div class="modal-body">
+      <p class="text-muted">Quick-fire quiz &middot; up to 4 players &middot; 30 seconds &middot; unlimited questions.</p>
       <form>
         <div class="form-group">
-          <label for="quizId" class="p-1 border-bottom">Host a quick-fire quiz. Time limit is 30
-            seconds.</label>
-          <br />
-          <div ngbDropdown class="d-inline-block">
-            <label for="quizId" class="p-1 border-bottom">Difficulty</label>
-            <button class="btn btn-secondary" id="dropdown" ngbDropdownToggle>{{selectedDifficulty.value}}</button>
-            <div ngbDropdownMenu aria-labelledby="dropdown">
-              <button ngbDropdownItem (click)="updateQuestionDifficulty(0)">Any</button>
-              <button ngbDropdownItem (click)="updateQuestionDifficulty(1)">Easy</button>
-              <button ngbDropdownItem (click)="updateQuestionDifficulty(2)">Medium</button>
-              <button ngbDropdownItem (click)="updateQuestionDifficulty(3)">Hard</button>
+          <label class="form-control-label">Your name</label>
+          <div class="input-group input-group-alternative">
+            <div class="input-group-prepend">
+              <span class="input-group-text"><i class="ni ni-single-02"></i></span>
             </div>
-            <br />
-            <label class="p-1 border-bottom">Username</label>
-            <input #hostUsername maxlength="12" (keyup.enter)="hostQuiz(hostUsername.value)" />
+            <input #hostUsername type="text" class="form-control" placeholder="Your name" maxlength="12"
+              (keyup.enter)="hostQuiz(hostUsername.value)">
+          </div>
+        </div>
+        <div class="form-group mb-0">
+          <label class="form-control-label">Difficulty</label>
+          <div class="btn-group btn-group-toggle btn-block" role="group">
+            <button *ngFor="let d of difficulties; let i = index" type="button" class="btn"
+              [class.btn-warning]="selectedDifficulty.index === i"
+              [class.btn-outline-warning]="selectedDifficulty.index !== i"
+              (click)="updateQuestionDifficulty(i)">
+              {{d}}
+            </button>
           </div>
         </div>
       </form>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-primary" (click)="hostQuiz(hostUsername.value)">Create</button>
+      <button type="button" class="btn btn-primary" (click)="hostQuiz(hostUsername.value)">
+        <i class="fas fa-play mr-1"></i>Create Quiz
+      </button>
     </div>
   </ng-template>
   <ng-template #showPartyModal let-modal>
