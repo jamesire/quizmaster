@@ -195,6 +195,23 @@ io.on('connection', socket => {
         return;
       }
 
+      // A refresh disconnects the old socket first, which removes this
+      // player from quiz.users (see the 'disconnect' handler above) and
+      // drops it out of the "quizId" room, so it stops receiving 'scores'
+      // broadcasts. Re-establish both here, on whichever socket - new or
+      // original - ends up asking for this quiz's questions, so a
+      // refreshed player still shows up on the party/score list and still
+      // gets live score updates from everyone else.
+      if (data.username) {
+        socket.username = data.username;
+        socket.quizId = data.quizId;
+        socket.join(data.quizId);
+
+        if (!quiz.users.includes(data.username)) {
+          quiz.users.push(data.username);
+        }
+      }
+
       socket.emit('send', { action: 'questions', quizId: data.quizId, questions: quiz.questions, partyList: quiz.users, scores: quiz.scores });
     }
     else if (data.action === 'submitScore') {

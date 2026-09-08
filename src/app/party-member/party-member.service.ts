@@ -67,9 +67,10 @@ export class PartyMemberService {
     this.partyMembers.next(startQuizData);
   }
 
-  getQuestions(quizId) {
+  getQuestions(quizId, username) {
     var data = {
       quizId: quizId,
+      username: username,
       action: 'getQuestions'
     }
 

@@ -65,7 +65,7 @@ export class StartQuizComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.partyMemberService.getQuestions(this.quizId);
+    this.partyMemberService.getQuestions(this.quizId, this.username);
   }
 
   ngOnDestroy() {
