@@ -5,6 +5,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Answer } from 'src/app/models/Answer';
 import { Question } from 'src/app/models/Question';
 import { QuizmasterApiService } from 'src/app/quizmaster-api-client/quizmaster-api-service.service';
+import { TriviaPreviewService } from 'src/app/quizmaster-api-client/trivia-preview.service';
 import { isSyntheticPropertyOrListener } from '@angular/compiler/src/render3/util';
 import { ɵHttpInterceptingHandler } from '@angular/common/http';
 import { interval, Subscription, Subject } from 'rxjs';
@@ -53,7 +54,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   @ViewChild('showPartyModal') showPartyModalContent: any;
   private closeResult = '';  
   private subscription: Subscription;
-  private timeoutInAction: boolean = false;
   private username: string;
   private countdownHandle: any;
   private randomQuestionRetryHandle: any;
@@ -62,8 +62,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly maxAutoRetries: number = 3;
 
   
-  constructor(private modalService: NgbModal, private quizMasterApiClient: QuizmasterApiService, private router: Router, private partyMemberService: PartyMemberService) 
-  { 
+  constructor(private modalService: NgbModal, private quizMasterApiClient: QuizmasterApiService, private triviaPreviewService: TriviaPreviewService, private router: Router, private partyMemberService: PartyMemberService)
+  {
     var defaultIndex = 0;
     var defaultDifficulty = this.difficulties[defaultIndex];
 
@@ -137,7 +137,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
       }
     })
-    await this.generateRandomQuestion();
+    await this.loadCurrentQuestion();
   }
 
   ngOnDestroy() {
@@ -152,35 +152,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.clearStartRetry();
   }
 
-  async generateRandomQuestion() {
+  // Loads whatever question TriviaPreviewService says is "current" - a
+  // freshly fetched one on a genuinely first visit, or the same one
+  // shown before a refresh, in the same shuffled answer order, if it
+  // hasn't been answered yet.
+  async loadCurrentQuestion() {
     try {
-      var questionList = await this.quizMasterApiClient.getRandomQuestions();
-      this.randomQuestion = questionList[0];
-      this.randomQuestion = QuestionHelper.setAnswerChoices(this.randomQuestion)[0];
-
-      this.randomQuestion.allAnswers.forEach((ans, index) => {
-        this.css[index] = ans.isCorrect ? "correct-answer" : "incorrect-answer";
-      })
-      this.answerIsSelected = false;
-      this.isLoaded = true;
+      const question = await this.triviaPreviewService.getCurrentQuestion();
+      this.applyQuestion(question);
     } catch (err) {
-      // Open Trivia DB rate-limits to ~1 request per 5 seconds per IP,
-      // and this tile re-fetches on every dashboard visit - easy to hit
-      // during a real session (host a quiz, play, back to dashboard,
-      // host again...). Failing quietly here matters: leaving
-      // randomQuestion undefined while isLoaded stayed false used to be
-      // safe, but only because *ngIf="isLoaded" was supposed to hide
-      // everything that reads randomQuestion - it didn't actually wrap
-      // the answers row (fixed in the template), so this rejection was
-      // driving a continuous render-throw loop on every change-detection
-      // cycle for as long as the dashboard stayed mounted.
-      //
+      // Open Trivia DB rate-limits to ~1 request per 5 seconds per IP.
       // This tile has no error state and no manual retry - just a
       // spinner until it succeeds - so it keeps trying indefinitely
       // rather than giving up after a fixed number of attempts.
       console.error('Could not load a preview trivia question: ' + err);
-      this.randomQuestionRetryHandle = setTimeout(() => this.generateRandomQuestion(), 5000);
+      this.randomQuestionRetryHandle = setTimeout(() => this.loadCurrentQuestion(), 5000);
     }
+  }
+
+  private applyQuestion(question: Question) {
+    this.randomQuestion = question;
+
+    this.randomQuestion.allAnswers.forEach((ans, index) => {
+      this.css[index] = ans.isCorrect ? "correct-answer" : "incorrect-answer";
+    })
+    this.answerIsSelected = false;
+    this.isLoaded = true;
   }
 
   openModal(content) {
@@ -202,20 +199,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   checkAnswer(i: number) {
-    this.answerIsSelected = true;
-    return this.randomQuestion.allAnswers[i].isCorrect;
-  }
-
-  regenerateRandomQuestion() {
-    if(!this.timeoutInAction) {
-      setTimeout(async () => { 
-        await this.generateRandomQuestion();
-        this.timeoutInAction = false;
-      }, 2500);
+    if (this.answerIsSelected) {
+      return;
     }
 
-    this.timeoutInAction = true;
-    return this.makeOpaque;
+    this.answerIsSelected = true;
+    const isCorrect = this.randomQuestion.allAnswers[i].isCorrect;
+
+    // Keep showing this question (highlighted) for a beat, then move on
+    // to the next one - only now does the "current" question actually
+    // advance, matching "keep the same question until it's answered".
+    setTimeout(async () => {
+      try {
+        const next = await this.triviaPreviewService.advance();
+        this.applyQuestion(next);
+      } catch (err) {
+        console.error('Could not load the next preview trivia question: ' + err);
+        this.randomQuestionRetryHandle = setTimeout(() => this.loadCurrentQuestion(), 5000);
+      }
+    }, 2500);
+
+    return isCorrect;
   }
 
   // isManualAttempt is false only when this is called from the automatic

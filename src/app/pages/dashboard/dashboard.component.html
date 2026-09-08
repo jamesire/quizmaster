@@ -18,7 +18,7 @@
                   <div class="col">
                     <h5 class="card-title text-uppercase text-muted mb-0">Random Trivia...</h5>
                     <span class="h2 font-weight-bold mb-0"
-                      [ngClass]="answerIsSelected && regenerateRandomQuestion()">{{randomQuestion.question}}</span>
+                      [ngClass]="answerIsSelected && [makeOpaque]">{{randomQuestion.question}}</span>
                   </div>
                 </div>
                 <div class="row mt-2">
@@ -116,7 +116,7 @@
     <div class="modal-body">
       <form>
         <div class="form-group">
-          <label for="quizId" class="p-1 border-bottom">Host a quick-fire quiz with 10 questions. Time limit is 60
+          <label for="quizId" class="p-1 border-bottom">Host a quick-fire quiz. Time limit is 30
             seconds.</label>
           <br />
           <div ngbDropdown class="d-inline-block">

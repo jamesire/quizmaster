@@ -13,7 +13,7 @@ import { QuestionHelper } from 'src/app/models/QuestionHelper';
 
 export class StartQuizComponent implements OnInit, OnDestroy {
   // One 30-second clock for the whole quiz, not per question - matches
-  // the "quick-fire quiz... time limit is 60 seconds" pitch on the
+  // the "quick-fire quiz... time limit is 30 seconds" pitch on the
   // hosting modal (whole-session limit, just at 30s per the user's
   // request instead of the originally-advertised 60). Players answer
   // as many questions as they can, at their own pace, before it expires.
