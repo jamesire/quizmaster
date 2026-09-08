@@ -118,15 +118,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   async generateRandomQuestion() {
-    var questionList = await this.quizMasterApiClient.getRandomQuestions();
-    this.randomQuestion = questionList[0];
-    this.randomQuestion = QuestionHelper.setAnswerChoices(this.randomQuestion)[0];
-    
-    this.randomQuestion.allAnswers.forEach((ans, index) => {
-      this.css[index] = ans.isCorrect ? "correct-answer" : "incorrect-answer";
-    })
-    this.answerIsSelected = false;
-    this.isLoaded = true;
+    try {
+      var questionList = await this.quizMasterApiClient.getRandomQuestions();
+      this.randomQuestion = questionList[0];
+      this.randomQuestion = QuestionHelper.setAnswerChoices(this.randomQuestion)[0];
+
+      this.randomQuestion.allAnswers.forEach((ans, index) => {
+        this.css[index] = ans.isCorrect ? "correct-answer" : "incorrect-answer";
+      })
+      this.answerIsSelected = false;
+      this.isLoaded = true;
+    } catch (err) {
+      // Open Trivia DB rate-limits to ~1 request per 5 seconds per IP,
+      // and this tile re-fetches on every dashboard visit - easy to hit
+      // during a real session (host a quiz, play, back to dashboard,
+      // host again...). Failing quietly here matters: leaving
+      // randomQuestion undefined while isLoaded stayed false used to be
+      // safe, but only because *ngIf="isLoaded" was supposed to hide
+      // everything that reads randomQuestion - it didn't actually wrap
+      // the answers row (fixed in the template), so this rejection was
+      // driving a continuous render-throw loop on every change-detection
+      // cycle for as long as the dashboard stayed mounted.
+      console.error('Could not load a preview trivia question: ' + err);
+    }
   }
 
   openModal(content) {
