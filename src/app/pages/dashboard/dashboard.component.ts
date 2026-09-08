@@ -53,6 +53,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private subscription: Subscription;
   private timeoutInAction: boolean = false;
   private username: string;
+  private countdownHandle: any;
 
   
   constructor(private modalService: NgbModal, private quizMasterApiClient: QuizmasterApiService, private router: Router, private partyMemberService: PartyMemberService) 
@@ -113,6 +114,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+    this.clearCountdown();
   }
 
   async generateRandomQuestion() {
@@ -173,15 +175,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private beginCountdown() {
     this.countdown = 3;
 
-    const interval = setInterval(() => {
+    this.countdownHandle = setInterval(() => {
       this.countdown--;
 
       if (this.countdown <= 0) {
-        clearInterval(interval);
+        this.clearCountdown();
         this.modalService.dismissAll();
         this.router.navigate(['/startQuiz', this.quizId, this.username]);
       }
     }, 1000);
+  }
+
+  private clearCountdown() {
+    if (this.countdownHandle) {
+      clearInterval(this.countdownHandle);
+      this.countdownHandle = null;
+    }
   }
 
   joinQuiz(quizId, username) {

@@ -92,7 +92,7 @@ io.on('connection', socket => {
   socket.on('send', async function (data) {
     if (data.action === 'host') {
       const quizId = generateQuizId();
-      quizzes.set(quizId, { difficulty: data.difficulty, users: [data.username], questions: null, scores: {} });
+      quizzes.set(quizId, { difficulty: data.difficulty, users: [data.username], questions: null, scores: {}, startedAt: null });
 
       socket.username = data.username;
       socket.quizId = quizId;
@@ -172,6 +172,11 @@ io.on('connection', socket => {
       try {
         if (!quiz.questions) {
           quiz.questions = await fetchQuizQuestions(50);
+          // The moment the clock actually starts for this quiz - not
+          // when any individual player's page happens to load. Lets a
+          // player who navigates away (or refreshes) mid-quiz and comes
+          // back see the real remaining time instead of a fresh 30s.
+          quiz.startedAt = Date.now();
         }
         io.sockets.in(socket.quizId).emit('send', { action: 'start', quizId: socket.quizId, questions: quiz.questions });
       } catch (err) {
@@ -212,7 +217,7 @@ io.on('connection', socket => {
         }
       }
 
-      socket.emit('send', { action: 'questions', quizId: data.quizId, questions: quiz.questions, partyList: quiz.users, scores: quiz.scores });
+      socket.emit('send', { action: 'questions', quizId: data.quizId, questions: quiz.questions, partyList: quiz.users, scores: quiz.scores, startedAt: quiz.startedAt });
     }
     else if (data.action === 'submitScore') {
       const quiz = quizzes.get(data.quizId);

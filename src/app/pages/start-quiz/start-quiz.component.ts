@@ -55,7 +55,7 @@ export class StartQuizComponent implements OnInit, OnDestroy {
         this.partyList = msg.partyList;
         this.scores = msg.scores;
         this.isLoaded = true;
-        this.startGameTimer();
+        this.startGameTimer(msg.startedAt);
       }
       else if (msg.action === 'scores' && msg.quizId === this.quizId) {
         this.scores = msg.scores;
@@ -108,9 +108,26 @@ export class StartQuizComponent implements OnInit, OnDestroy {
     }, 2500);
   }
 
-  private startGameTimer() {
+  // Bases the countdown on the quiz's actual start time (from the
+  // server) rather than always resetting to a fresh secondsForGame -
+  // otherwise navigating away and back (or refreshing) would silently
+  // extend a player's playing time by however long they were away.
+  private startGameTimer(startedAt: number) {
     this.clearTimer();
-    this.secondsRemaining = this.secondsForGame;
+
+    const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+    this.secondsRemaining = this.secondsForGame - elapsedSeconds;
+
+    if (this.secondsRemaining <= 0) {
+      // Time was already up before this page even finished loading -
+      // e.g. re-entering well after navigating away mid-quiz. Just show
+      // whatever's already on the scoreboard; don't submit a score for
+      // this instance (score would be 0, since it never actually played
+      // this session, and would overwrite what was submitted earlier).
+      this.secondsRemaining = 0;
+      this.isFinished = true;
+      return;
+    }
 
     this.timerHandle = setInterval(() => {
       this.secondsRemaining--;
