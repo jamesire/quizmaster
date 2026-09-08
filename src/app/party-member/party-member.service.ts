@@ -45,8 +45,10 @@ export class PartyMemberService {
   }
 
   leaveQuiz(username, quizId) {
-    this.wsService.disconnect();
-    
+    // Note: this does not disconnect the socket. The connection is
+    // shared for the whole app session (one player might leave a party
+    // and then host or join a different quiz afterwards), so only the
+    // room membership ends here - not the connection itself.
     var partyMembersData = {
       username: username,
       quizId: quizId,

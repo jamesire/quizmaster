@@ -6,10 +6,9 @@ import { Injectable } from '@angular/core';
 // to build. Don't let `npm audit fix`/Dependabot bump this past 4.5.4
 // without also moving off Angular 9's TypeScript ceiling.
 import { io } from 'socket.io-client';
-import { Observable } from 'rxjs/Observable';
+import { Subject } from 'rxjs';
 import * as Rx from 'rxjs/Rx';
 import { environment } from '../../environments/environment';
-import { R3ExpressionFactoryMetadata } from '@angular/compiler/src/render3/r3_factory';
 
 @Injectable({
   providedIn: 'root'
@@ -17,23 +16,30 @@ import { R3ExpressionFactoryMetadata } from '@angular/compiler/src/render3/r3_fa
 export class WebsocketService {
 
   private socket;
-
-  constructor() { }
+  // A real multicast Subject relaying every incoming "send" message.
+  // The socket's "send" listener is registered against this exactly
+  // once, for the app's lifetime - any number of components can
+  // subscribe/unsubscribe from what connect() returns without affecting
+  // this, or the socket connection, at all. (Previously connect()
+  // wrapped the socket in a plain cold Observable, whose producer
+  // function re-ran - registering another socket.on('send', ...)
+  // listener - on every single .subscribe(), and whose teardown called
+  // this.socket.disconnect(). That meant any one component unsubscribing
+  // killed the entire app's connection, not just its own listener -
+  // invisible as long as nothing ever unsubscribed, which is exactly
+  // what changed once components started properly cleaning up their
+  // subscriptions.)
+  private incoming = new Subject<any>();
 
   connect(): Rx.Subject<MessageEvent> {
-    // An empty URL means "same origin as this page" - io() with no
-    // argument connects to whatever host served the app.
-    this.socket = environment.SOCKET_IO_URL ? io(environment.SOCKET_IO_URL) : io();
-
-    let observable = new Observable(observer => {
+    if (!this.socket) {
+      // An empty URL means "same origin as this page" - io() with no
+      // argument connects to whatever host served the app.
+      this.socket = environment.SOCKET_IO_URL ? io(environment.SOCKET_IO_URL) : io();
       this.socket.on('send', (data) => {
-        console.log("Received message from websocket server: " + data);
-        observer.next(data);
-      })
-      return () => {
-        this.socket.disconnect();
-      }
-    })
+        this.incoming.next(data);
+      });
+    }
 
     let observer = {
       next: (data: Object) => {
@@ -41,19 +47,12 @@ export class WebsocketService {
       }
     }
 
-    return Rx.Subject.create(observer, observable);
+    return Rx.Subject.create(observer, this.incoming);
   }
 
-  // joinRoom(username, quizId) {
-  //   var data = {
-  //     username,
-  //     quizId
-  //   };
-
-  //   this.socket.emit('send', data);
-  // }
-
   disconnect() {
-    this.socket.emit('disconnect');
+    if (this.socket) {
+      this.socket.disconnect();
+    }
   }
 }
