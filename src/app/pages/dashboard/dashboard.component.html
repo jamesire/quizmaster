@@ -79,30 +79,40 @@
   <!-- Todo: Componentise this -->
   <ng-template #joinQuizModal let-modal>
     <div class="modal-header">
-      <h4 class="modal-title" id="modal-basic-title">Join a Quiz</h4>
+      <h4 class="modal-title" id="modal-basic-title"><i class="fas fa-check-circle text-success mr-2"></i>Join a Quiz</h4>
       <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
     <div class="modal-body">
+      <p class="text-muted">Enter the quiz ID from your host, then pick a name.</p>
       <form>
         <div class="form-group">
-          <label for="quizId">Enter the Quiz ID provided by the Quiz Master.</label>
-          <div class="input-group">
+          <label class="form-control-label">Quiz ID</label>
+          <div class="input-group input-group-alternative">
+            <div class="input-group-prepend">
+              <span class="input-group-text"><i class="ni ni-key-25"></i></span>
+            </div>
             <input #quizId type="text" class="form-control" placeholder="Quiz ID" aria-label="Quiz ID"
-              aria-describedby="basic-addon" (keyup.enter)="joinQuiz(quizId.value, username.value)">
+              (keyup.enter)="joinQuiz(quizId.value, username.value)">
           </div>
-          <label for="quizId">Enter your name.</label>
-          <div class="input-group">
-            <input #username type="text" class="form-control" placeholder="Name" aria-label="Name" maxlength="12"
-              aria-describedby="basic-addon" (keyup.enter)="joinQuiz(quizId.value, username.value)">
+        </div>
+        <div class="form-group mb-0">
+          <label class="form-control-label">Your name</label>
+          <div class="input-group input-group-alternative">
+            <div class="input-group-prepend">
+              <span class="input-group-text"><i class="ni ni-single-02"></i></span>
+            </div>
+            <input #username type="text" class="form-control" placeholder="Your name" aria-label="Name" maxlength="12"
+              (keyup.enter)="joinQuiz(quizId.value, username.value)">
           </div>
         </div>
       </form>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-primary"
-        (click)="joinQuiz(quizId.value, username.value)">Join</button>
+      <button type="button" class="btn btn-primary" (click)="joinQuiz(quizId.value, username.value)">
+        <i class="fas fa-sign-in-alt mr-1"></i>Join Quiz
+      </button>
     </div>
   </ng-template>
   <!-- Todo: Componentise this -->
@@ -147,34 +157,44 @@
   </ng-template>
   <ng-template #showPartyModal let-modal>
     <div class="modal-header">
-      <h4 class="modal-title" id="modal-basic-title">Your Quiz ID is {{quizId}}</h4>
+      <h4 class="modal-title" id="modal-basic-title"><i class="fas fa-users text-info mr-2"></i>Quiz Lobby</h4>
       <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
     <div class="modal-body">
-      <form>
-        <div class="form-group" *ngIf="countdown === null && !startingQuiz">
-          <label>{{ userIsHost ? 'Waiting for People to Join...' : 'Waiting for host to start quiz...' }}</label>
-          <div *ngFor="let person of party;">
-            {{person}}
-          </div>
-          <p *ngIf="startError" class="text-danger mt-2 mb-0">{{startError}}</p>
+      <div class="text-center mb-4" *ngIf="countdown === null">
+        <p class="text-uppercase text-muted small mb-1">Quiz ID</p>
+        <span class="h2 font-weight-bold text-primary">{{quizId}}</span>
+      </div>
+
+      <div *ngIf="countdown === null && !startingQuiz">
+        <p class="text-uppercase text-muted text-center small mb-2">{{ userIsHost ? 'Waiting for people to join...' : 'Waiting for host to start quiz...' }}</p>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex align-items-center px-0" *ngFor="let person of party;"
+            [class.font-weight-bold]="person === username">
+            <i class="fas fa-user-circle text-muted mr-2"></i>{{person}}
+          </li>
+        </ul>
+        <p *ngIf="startError" class="text-danger mt-3 mb-0 text-center">{{startError}}</p>
+      </div>
+
+      <div class="text-center py-3" *ngIf="startingQuiz">
+        <div class="spinner-border text-primary" role="status">
+          <span class="sr-only">Loading...</span>
         </div>
-        <div class="text-center py-3" *ngIf="startingQuiz">
-          <div class="spinner-border text-primary" role="status">
-            <span class="sr-only">Loading...</span>
-          </div>
-          <p class="text-muted mt-2 mb-0">Preparing your quiz…</p>
-        </div>
-        <div class="text-center" *ngIf="countdown !== null">
-          <span class="h1 font-weight-bold">{{ countdown > 0 ? countdown : 'Go!' }}</span>
-        </div>
-      </form>
+        <p class="text-muted mt-2 mb-0">Preparing your quiz…</p>
+      </div>
+
+      <div class="text-center py-3" *ngIf="countdown !== null">
+        <span class="display-3 font-weight-bold text-primary">{{ countdown > 0 ? countdown : 'Go!' }}</span>
+      </div>
     </div>
     <div class="modal-footer">
-      <button *ngIf="userIsHost && countdown === null && !startingQuiz" type="button" class="btn btn-primary"
-        (click)="startQuiz()">{{ startError ? 'Retry' : 'Start Quiz' }}</button>
+      <button *ngIf="userIsHost && countdown === null && !startingQuiz" type="button" class="btn btn-primary btn-block"
+        (click)="startQuiz()">
+        <i class="fas fa-play mr-1"></i>{{ startError ? 'Retry' : 'Start Quiz' }}
+      </button>
     </div>
   </ng-template>
 </div>

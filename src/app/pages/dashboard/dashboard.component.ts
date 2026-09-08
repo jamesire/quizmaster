@@ -54,7 +54,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   @ViewChild('showPartyModal') showPartyModalContent: any;
   private closeResult = '';  
   private subscription: Subscription;
-  private username: string;
+  public username: string;
   private countdownHandle: any;
   private randomQuestionRetryHandle: any;
   private startRetries: number = 0;
