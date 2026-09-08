@@ -17,7 +17,7 @@
                 <div class="col">
                   <h5 class="card-title text-uppercase text-muted mb-0">Question {{questionIndex + 1}}.</h5>
                   <span class="h2 font-weight-bold mb-0"
-                    [ngClass]="answerIsSelected && regenerateQuestion()">{{quizQuestions[questionIndex].question}}</span>
+                    [ngClass]="answerIsSelected && [makeOpaque]">{{quizQuestions[questionIndex].question}}</span>
                 </div>
               </div>
               <div class="row mt-2">

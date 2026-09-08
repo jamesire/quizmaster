@@ -89,7 +89,7 @@ export class DashboardComponent {
       }
       else if(msg.action === "start")
       {
-        this.router.navigate(['/startQuiz']);
+        this.router.navigate(['/startQuiz', this.quizId]);
         this.modalService.dismissAll();
       }
       else if(msg.action === "error")

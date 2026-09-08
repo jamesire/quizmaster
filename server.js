@@ -30,6 +30,30 @@ function generateQuizId() {
   return id;
 }
 
+// Fetches one shared set of questions for a quiz - called once per quiz,
+// not once per player, so every player gets the same questions in the
+// same order. `encode=url3986` asks Open Trivia DB for percent-encoded
+// text instead of HTML entities, which Node can decode with the built-in
+// decodeURIComponent (no DOM/entity table needed server-side).
+async function fetchQuizQuestions(amount) {
+  const url = 'https://opentdb.com/api.php?amount=' + amount + '&encode=url3986';
+  const response = await fetch(url);
+  const body = await response.json();
+
+  if (body.response_code !== 0) {
+    throw new Error('Open Trivia DB could not return questions for this request (response_code ' + body.response_code + ').');
+  }
+
+  return body.results.map(result => ({
+    category: decodeURIComponent(result.category),
+    type: result.type,
+    difficulty: result.difficulty,
+    question: decodeURIComponent(result.question),
+    correctAnswer: decodeURIComponent(result.correct_answer),
+    incorrectAnswers: result.incorrect_answers.map(answer => decodeURIComponent(answer))
+  }));
+}
+
 function removeUserFromQuiz(quizId, username) {
   const quiz = quizzes.get(quizId);
   if (!quiz) {
@@ -65,10 +89,10 @@ io.on('connection', socket => {
     socket.quizId = '';
   });
 
-  socket.on('send', function (data) {
+  socket.on('send', async function (data) {
     if (data.action === 'host') {
       const quizId = generateQuizId();
-      quizzes.set(quizId, { difficulty: data.difficulty, users: [data.username] });
+      quizzes.set(quizId, { difficulty: data.difficulty, users: [data.username], questions: null });
 
       socket.username = data.username;
       socket.quizId = quizId;
@@ -138,7 +162,40 @@ io.on('connection', socket => {
       socket.quizId = '';
     }
     else if (data.action === 'start') {
-      io.sockets.in(socket.quizId).emit('send', { action: 'start' });
+      const quiz = quizzes.get(socket.quizId);
+
+      if (!quiz) {
+        socket.emit('send', { action: 'error', message: 'This quiz no longer exists.' });
+        return;
+      }
+
+      try {
+        if (!quiz.questions) {
+          quiz.questions = await fetchQuizQuestions(50);
+        }
+        io.sockets.in(socket.quizId).emit('send', { action: 'start', quizId: socket.quizId, questions: quiz.questions });
+      } catch (err) {
+        console.error('Failed to fetch quiz questions: ' + err);
+        socket.emit('send', { action: 'error', message: 'Could not load quiz questions. Please try again.' });
+      }
+    }
+    else if (data.action === 'getQuestions') {
+      // Used when the quiz page loads - including on a refresh, where all
+      // client-side state (and the previous socket connection) is gone.
+      // Serves the same cached question set generated on 'start' rather
+      // than fetching a fresh, differently-ordered set per request.
+      const quiz = quizzes.get(data.quizId);
+
+      if (!quiz) {
+        socket.emit('send', { action: 'error', message: 'This quiz no longer exists.' });
+        return;
+      }
+      if (!quiz.questions) {
+        socket.emit('send', { action: 'error', message: 'This quiz has not started yet.' });
+        return;
+      }
+
+      socket.emit('send', { action: 'questions', quizId: data.quizId, questions: quiz.questions });
     }
     else {
       console.log('Unspecified action');

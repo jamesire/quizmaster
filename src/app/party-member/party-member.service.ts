@@ -61,8 +61,17 @@ export class PartyMemberService {
       quizId: quizId,
       action: 'start'
     }
-  
+
     this.partyMembers.next(startQuizData);
+  }
+
+  getQuestions(quizId) {
+    var data = {
+      quizId: quizId,
+      action: 'getQuestions'
+    }
+
+    this.partyMembers.next(data);
   }
 
 }
