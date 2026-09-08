@@ -59,6 +59,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private countdownHandle: any;
   private randomQuestionRetries: number = 0;
   private randomQuestionRetryHandle: any;
+  private startRetries: number = 0;
+  private startRetryHandle: any;
   private readonly maxAutoRetries: number = 3;
 
   
@@ -105,6 +107,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       else if(msg.action === "start")
       {
         this.startingQuiz = false;
+        this.startRetries = 0;
+        this.clearStartRetry();
         this.beginCountdown();
       }
       else if(msg.action === "error")
@@ -115,8 +119,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
           // A transient failure fetching quiz questions - stay in the
           // party modal and offer a retry instead of dumping the user
           // back to the dashboard with just an alert.
-          this.startingQuiz = false;
           this.startError = msg.message;
+
+          if (this.startRetries < this.maxAutoRetries) {
+            this.startRetries++;
+            // 5s matches Open Trivia DB's own rate-limit window -
+            // retrying sooner would just fail again. Keep the spinner
+            // up through the wait rather than dropping back to the
+            // party list, so it reads as "still working" not "done".
+            this.startRetryHandle = setTimeout(() => this.startQuiz(false), 5000);
+          } else {
+            this.startingQuiz = false;
+          }
         } else {
           // Something retrying can't fix (bad quiz ID, username taken,
           // quiz full, room gone) - nothing to show a spinner for.
@@ -137,6 +151,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       clearTimeout(this.randomQuestionRetryHandle);
       this.randomQuestionRetryHandle = null;
     }
+    this.clearStartRetry();
   }
 
   async generateRandomQuestion() {
@@ -215,10 +230,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return this.makeOpaque;
   }
 
-  startQuiz() {
+  // isManualAttempt is false only when this is called from the automatic
+  // retry timer - a fresh user-initiated click (the default) gets its
+  // own full batch of auto-retries rather than inheriting however many
+  // of the previous batch were already used.
+  startQuiz(isManualAttempt: boolean = true) {
+    if (isManualAttempt) {
+      this.startRetries = 0;
+    }
+    this.clearStartRetry();
     this.startingQuiz = true;
     this.startError = null;
     this.partyMemberService.startQuiz(this.quizId);
+  }
+
+  private clearStartRetry() {
+    if (this.startRetryHandle) {
+      clearTimeout(this.startRetryHandle);
+      this.startRetryHandle = null;
+    }
   }
 
   // Runs in the party modal for host and guests alike - everyone gets the
