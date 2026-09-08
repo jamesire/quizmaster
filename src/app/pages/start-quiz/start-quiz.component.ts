@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PartyMemberService } from 'src/app/party-member/party-member.service';
 import { Question } from 'src/app/models/Question';
 import { QuestionHelper } from 'src/app/models/QuestionHelper';
@@ -11,19 +11,25 @@ import { QuestionHelper } from 'src/app/models/QuestionHelper';
 })
 
 export class StartQuizComponent implements OnInit, OnDestroy {
-  public readonly secondsPerQuestion: number = 30;
+  // One 30-second clock for the whole quiz, not per question - matches
+  // the "quick-fire quiz... time limit is 60 seconds" pitch on the
+  // hosting modal (whole-session limit, just at 30s per the user's
+  // request instead of the originally-advertised 60). Players answer
+  // as many questions as they can, at their own pace, before it expires.
+  public readonly secondsForGame: number = 30;
+  public secondsRemaining: number = this.secondsForGame;
   public  questionIndex: number = 0;
   public readonly makeOpaque: string = "change-opacity-on-answer";
   public isLoaded: boolean = false;
+  public isFinished: boolean = false;
   public answerIsSelected: boolean = false;
   public quizQuestions: Question[];
   public css: string[] = [];
   public score: number = 0;
-  public secondsRemaining: number = this.secondsPerQuestion;
   private quizId: string;
   private timerHandle: any;
 
-  constructor(private route: ActivatedRoute, private partyMemberService: PartyMemberService) { }
+  constructor(private route: ActivatedRoute, private router: Router, private partyMemberService: PartyMemberService) { }
 
   ngOnInit() {
     this.quizId = this.route.snapshot.paramMap.get('quizId');
@@ -36,7 +42,7 @@ export class StartQuizComponent implements OnInit, OnDestroy {
       if (msg.action === 'questions' && msg.quizId === this.quizId) {
         this.quizQuestions = QuestionHelper.setAnswerChoices(msg.questions);
         this.isLoaded = true;
-        this.startTimer();
+        this.startGameTimer();
       }
       else if (msg.action === 'error') {
         console.error('Start quiz message: ' + msg.message);
@@ -51,18 +57,13 @@ export class StartQuizComponent implements OnInit, OnDestroy {
   }
 
   checkAnswer(i: number) {
-    if (this.answerIsSelected) {
+    if (this.answerIsSelected || this.isFinished) {
       return;
     }
 
-    this.clearTimer();
     this.answerIsSelected = true;
 
     // Highlight every answer for the question just answered right away.
-    // This used to happen inside a 2.5s setTimeout, by which point
-    // answerIsSelected had already been reset back to false - so the
-    // highlight was computed against the wrong question and never
-    // actually rendered while visible.
     this.quizQuestions[this.questionIndex].allAnswers.forEach((answer, index) => {
       this.css[index] = answer.isCorrect ? "correct-answer" : "incorrect-answer";
     });
@@ -71,21 +72,31 @@ export class StartQuizComponent implements OnInit, OnDestroy {
       this.score++;
     }
 
-    this.advanceAfterDelay();
+    setTimeout(() => {
+      if (this.isFinished) {
+        return;
+      }
+
+      this.answerIsSelected = false;
+      this.css = [];
+
+      // 30s can't realistically reach the end of a 50-question set (that's
+      // ~12 questions even answering instantly with no reading time), but
+      // guard it anyway rather than let it run off the end of the array.
+      if (this.questionIndex + 1 < this.quizQuestions.length) {
+        this.questionIndex++;
+      }
+    }, 2500);
   }
 
-  // Each player runs their own 30-second-per-question clock, independent
-  // of everyone else's pace - matches how the app already lets players
-  // move through the question list on their own, just with a shared rule
-  // (same 30 seconds) rather than a single clock synced across players.
-  private startTimer() {
+  private startGameTimer() {
     this.clearTimer();
-    this.secondsRemaining = this.secondsPerQuestion;
+    this.secondsRemaining = this.secondsForGame;
 
     this.timerHandle = setInterval(() => {
       this.secondsRemaining--;
       if (this.secondsRemaining <= 0) {
-        this.timeExpired();
+        this.endGame();
       }
     }, 1000);
   }
@@ -97,29 +108,12 @@ export class StartQuizComponent implements OnInit, OnDestroy {
     }
   }
 
-  private timeExpired() {
-    if (this.answerIsSelected) {
-      return;
-    }
-
+  private endGame() {
     this.clearTimer();
-    this.answerIsSelected = true;
-
-    // No answer was chosen in time - still reveal the correct one, same
-    // as answering wrong.
-    this.quizQuestions[this.questionIndex].allAnswers.forEach((answer, index) => {
-      this.css[index] = answer.isCorrect ? "correct-answer" : "incorrect-answer";
-    });
-
-    this.advanceAfterDelay();
+    this.isFinished = true;
   }
 
-  private advanceAfterDelay() {
-    setTimeout(() => {
-      this.questionIndex++;
-      this.answerIsSelected = false;
-      this.css = [];
-      this.startTimer();
-    }, 2500);
+  backToDashboard() {
+    this.router.navigate(['/dashboard']);
   }
 }

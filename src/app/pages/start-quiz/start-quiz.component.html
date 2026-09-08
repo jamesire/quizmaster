@@ -13,35 +13,44 @@
         <div class="mx-auto">
           <div class="card card-stats mb-4 mb-xl-0">
             <div class="card-body">
-              <div *ngIf="isLoaded" class="row align-items-center">
-                <div class="col">
-                  <h5 class="card-title text-uppercase text-muted mb-0">Question {{questionIndex + 1}}.</h5>
-                  <span class="h2 font-weight-bold mb-0"
-                    [ngClass]="answerIsSelected && [makeOpaque]">{{quizQuestions[questionIndex].question}}</span>
-                </div>
-                <div class="col-auto">
-                  <span class="badge badge-pill" [ngClass]="secondsRemaining <= 10 ? 'badge-danger' : 'badge-warning'">
-                    {{secondsRemaining}}s
-                  </span>
-                </div>
-              </div>
-              <div class="row mt-2">
-                <div class="col">
-                  <!-- <p class="mb-0 text-muted text-sm">
-                        <span class="text-nowrap">Answers/input down here maybe?</span>
-                      </p> -->
-                  <div *ngFor="let answer of quizQuestions[questionIndex].allAnswers; let i = index;"
-                    class="btn-group btn-group-toggle w-50" ngbRadioGroup name="radioBasic" [(ngModel)]="model"
-                    [ngClass]="answerIsSelected && [makeOpaque]">
-                    <label ngbButtonLabel class="btn-primary btn-block m-1" [ngClass]="answerIsSelected && [css[i]]"
-                      [value]="[i]" (click)="checkAnswer(i)">
-                      {{answer.text}}
-                    </label>
+              <ng-container *ngIf="isLoaded && !isFinished">
+                <div class="row align-items-center">
+                  <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">Question {{questionIndex + 1}}.</h5>
+                    <span class="h2 font-weight-bold mb-0"
+                      [ngClass]="answerIsSelected && [makeOpaque]">{{quizQuestions[questionIndex].question}}</span>
+                  </div>
+                  <div class="col-auto">
+                    <span class="badge badge-pill" [ngClass]="secondsRemaining <= 10 ? 'badge-danger' : 'badge-warning'">
+                      {{secondsRemaining}}s
+                    </span>
                   </div>
                 </div>
-                <!-- <div class="ml-auto mr-3">
-                      <button class="btn btn-sm btn-primary">Submit</button>
-                    </div> -->
+                <div class="row mt-2">
+                  <div class="col">
+                    <!-- <p class="mb-0 text-muted text-sm">
+                          <span class="text-nowrap">Answers/input down here maybe?</span>
+                        </p> -->
+                    <div *ngFor="let answer of quizQuestions[questionIndex].allAnswers; let i = index;"
+                      class="btn-group btn-group-toggle w-50" ngbRadioGroup name="radioBasic" [(ngModel)]="model"
+                      [ngClass]="answerIsSelected && [makeOpaque]">
+                      <label ngbButtonLabel class="btn-primary btn-block m-1" [ngClass]="answerIsSelected && [css[i]]"
+                        [value]="[i]" (click)="checkAnswer(i)">
+                        {{answer.text}}
+                      </label>
+                    </div>
+                  </div>
+                  <!-- <div class="ml-auto mr-3">
+                        <button class="btn btn-sm btn-primary">Submit</button>
+                      </div> -->
+                </div>
+              </ng-container>
+              <div *ngIf="isFinished" class="row">
+                <div class="col text-center">
+                  <h5 class="card-title text-uppercase text-muted mb-0">Time's up!</h5>
+                  <span class="h2 font-weight-bold mb-3 d-block">Final score: {{score}}</span>
+                  <button type="button" class="btn btn-primary" (click)="backToDashboard()">Back to dashboard</button>
+                </div>
               </div>
             </div>
           </div>
@@ -49,10 +58,11 @@
       </div>
     </div>
   </div>
-  <div class="container-fluid pt-6">
+  <div class="container-fluid pt-6" *ngIf="!isFinished">
     <div class="row">
       <div class="col text-center">
         <button type="button" class="btn btn-primary">{{score}}</button>
       </div>
     </div>
   </div>
+</div>
