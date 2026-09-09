@@ -66,7 +66,16 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private randomQuestionRetryHandle: any;
   private startRetries: number = 0;
   private startRetryHandle: any;
+  private startTimeoutHandle: any;
+  private hostTimeoutHandle: any;
+  private joinTimeoutHandle: any;
   private readonly maxAutoRetries: number = 3;
+  // Production connections (polling-only, behind Cloudflare, session
+  // state wiped on every redeploy) have shown real flakiness where a
+  // server response - success or error - simply never arrives. Without
+  // this, hostQuiz/joinQuiz/startQuiz would wait forever: a closed modal
+  // with nothing ever happening, or a spinner that never resolves.
+  private readonly confirmationTimeoutMs: number = 8000;
 
   
   constructor(private modalService: NgbModal, private quizMasterApiClient: QuizmasterApiService, private triviaPreviewService: TriviaPreviewService, private router: Router, private route: ActivatedRoute, private partyMemberService: PartyMemberService)
@@ -91,6 +100,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscription = this.partyMemberService.partyMembers.subscribe(msg => {
       if(msg.action === "hosted") {
         // Server generated our quiz ID - now we can show the party modal.
+        this.clearHostTimeout();
         this.quizId = msg.quizId;
         this.party = msg.partyList;
         this.userIsHost = true;
@@ -101,6 +111,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         this.party = msg.partyList;
         if(!this.showPartyModal && msg.username === this.username) {
           // This is our own join being confirmed by the server.
+          this.clearJoinTimeout();
           this.showPartyModal = true;
           this.openModal(this.showPartyModalContent);
         }
@@ -111,6 +122,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       else if(msg.action === "start")
       {
+        this.clearStartTimeout();
         this.startingQuiz = false;
         this.startRetries = 0;
         this.clearStartRetry();
@@ -120,22 +132,14 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       {
         console.error("Dashboard message: " + msg.message);
 
-        if (msg.retryable) {
-          // A transient failure fetching quiz questions - stay in the
-          // party modal and offer a retry instead of dumping the user
-          // back to the dashboard with just an alert.
-          this.startError = msg.message;
+        // Any error response means the server is there and answering -
+        // whichever request was still pending got its response.
+        this.clearHostTimeout();
+        this.clearJoinTimeout();
+        this.clearStartTimeout();
 
-          if (this.startRetries < this.maxAutoRetries) {
-            this.startRetries++;
-            // 5s matches Open Trivia DB's own rate-limit window -
-            // retrying sooner would just fail again. Keep the spinner
-            // up through the wait rather than dropping back to the
-            // party list, so it reads as "still working" not "done".
-            this.startRetryHandle = setTimeout(() => this.startQuiz(false), 5000);
-          } else {
-            this.startingQuiz = false;
-          }
+        if (msg.retryable) {
+          this.handleRetryableStartFailure(msg.message);
         } else {
           // Something retrying can't fix (bad quiz ID, username taken,
           // quiz full, room gone) - nothing to show a spinner for.
@@ -169,6 +173,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       this.randomQuestionRetryHandle = null;
     }
     this.clearStartRetry();
+    this.clearStartTimeout();
+    this.clearHostTimeout();
+    this.clearJoinTimeout();
   }
 
   // Loads whatever question TriviaPreviewService says is "current" - a
@@ -253,12 +260,63 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.startingQuiz = true;
     this.startError = null;
     this.partyMemberService.startQuiz(this.quizId);
+
+    // Covers total silence - neither a "start" nor an "error" ever
+    // arriving - which the retry logic above can't react to since it
+    // only fires off a message that was actually received.
+    this.clearStartTimeout();
+    this.startTimeoutHandle = setTimeout(() => {
+      this.startTimeoutHandle = null;
+      console.error('Dashboard message: start request timed out with no server response');
+      this.handleRetryableStartFailure('The server didn\'t respond. Retrying...');
+    }, this.confirmationTimeoutMs);
+  }
+
+  // Shared by both the "server explicitly said this is retryable" path
+  // and the "server never responded at all" watchdog - same recovery
+  // either way: stay in the party modal and either auto-retry or give up
+  // after maxAutoRetries, rather than dumping the user back out with an
+  // alert or leaving the spinner stuck forever.
+  private handleRetryableStartFailure(message: string) {
+    this.startError = message;
+
+    if (this.startRetries < this.maxAutoRetries) {
+      this.startRetries++;
+      // 5s matches Open Trivia DB's own rate-limit window - retrying
+      // sooner would just fail again. Keep the spinner up through the
+      // wait rather than dropping back to the party list, so it reads
+      // as "still working" not "done".
+      this.startRetryHandle = setTimeout(() => this.startQuiz(false), 5000);
+    } else {
+      this.startingQuiz = false;
+    }
   }
 
   private clearStartRetry() {
     if (this.startRetryHandle) {
       clearTimeout(this.startRetryHandle);
       this.startRetryHandle = null;
+    }
+  }
+
+  private clearStartTimeout() {
+    if (this.startTimeoutHandle) {
+      clearTimeout(this.startTimeoutHandle);
+      this.startTimeoutHandle = null;
+    }
+  }
+
+  private clearHostTimeout() {
+    if (this.hostTimeoutHandle) {
+      clearTimeout(this.hostTimeoutHandle);
+      this.hostTimeoutHandle = null;
+    }
+  }
+
+  private clearJoinTimeout() {
+    if (this.joinTimeoutHandle) {
+      clearTimeout(this.joinTimeoutHandle);
+      this.joinTimeoutHandle = null;
     }
   }
 
@@ -302,7 +360,17 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.quizIdCopied = false;
 
     // The party modal opens once the server confirms the join (see the
-    // "join"/"error" cases in the ngOnInit subscription above).
+    // "join"/"error" cases in the ngOnInit subscription above). The
+    // modal above is already dismissed by this point, so if that
+    // confirmation is lost in transit (dropped/flaky connection, a
+    // stale session after a redeploy), there'd otherwise be nothing left
+    // on screen to tell the user anything went wrong at all.
+    this.clearJoinTimeout();
+    this.joinTimeoutHandle = setTimeout(() => {
+      this.joinTimeoutHandle = null;
+      alert('Could not join the quiz - the server didn\'t respond in time. Please try again.');
+    }, this.confirmationTimeoutMs);
+
     this.partyMemberService.joinQuiz(username, quizId);
   }
 
@@ -319,7 +387,17 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.quizIdCopied = false;
 
     // The party modal opens once the server assigns a quiz ID (see the
-    // "hosted" case in the ngOnInit subscription above).
+    // "hosted" case in the ngOnInit subscription above). The modal above
+    // is already dismissed by this point, so if that confirmation is
+    // lost in transit (dropped/flaky connection, a stale session after a
+    // redeploy), there'd otherwise be nothing left on screen to tell the
+    // user anything went wrong at all - just a closed modal and silence.
+    this.clearHostTimeout();
+    this.hostTimeoutHandle = setTimeout(() => {
+      this.hostTimeoutHandle = null;
+      alert('Could not create the quiz - the server didn\'t respond in time. Please try again.');
+    }, this.confirmationTimeoutMs);
+
     this.partyMemberService.hostQuiz(username, this.selectedDifficulty.index);
   }
 
