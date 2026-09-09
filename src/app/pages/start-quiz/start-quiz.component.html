@@ -74,7 +74,7 @@
                     <li class="list-group-item d-flex align-items-center px-0"
                       *ngFor="let person of getSortedParty(); let i = index"
                       [class.font-weight-bold]="person === username">
-                      <span class="rank-badge mr-3" [ngClass]="i === 0 ? 'bg-warning' : 'bg-secondary'">{{i + 1}}</span>
+                      <span class="rank-badge mr-3" [ngClass]="i === 0 ? 'bg-warning' : 'rank-badge-default'">{{i + 1}}</span>
                       <i class="fas fa-user-circle text-muted mr-2"></i>
                       <span class="flex-grow-1">{{person}}<span *ngIf="person === username" class="text-muted font-weight-normal"> (you)</span></span>
                       <span class="badge badge-pill badge-primary px-3 py-2">

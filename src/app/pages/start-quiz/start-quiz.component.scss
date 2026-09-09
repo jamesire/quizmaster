@@ -105,6 +105,16 @@
     flex-shrink: 0;
 }
 
+// This theme's $secondary (#f7fafc) is a near-white gray - fine as a
+// light background elsewhere, but paired with this badge's white text
+// it was almost unreadable. Used for every rank below 1st instead of
+// bg-secondary; #525f7f is this theme's own $gray-700 ("Line p color"),
+// reused directly since component styles here don't import the shared
+// variables file.
+.rank-badge-default {
+    background-color: #525f7f;
+}
+
 #overlay {
     position: fixed;
     display: none;
