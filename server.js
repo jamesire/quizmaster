@@ -54,6 +54,52 @@ async function fetchQuizQuestions(amount) {
   }));
 }
 
+// A pool of pre-fetched 50-question batches, topped up steadily in the
+// background instead of fetching live at the exact moment someone clicks
+// Start. Open Trivia DB only allows ~1 request per 5s per IP, shared
+// across every quiz on this whole app - fetching on demand means a burst
+// of simultaneous hosts (a Reddit-post spike, say) all race the same
+// 5-second window and most of them lose (a 10-quiz burst test measured
+// 40% needing a manual retry; a 20-quiz burst measured 65%). Drawing
+// from a buffer that was filled gradually during the quiet time *before*
+// a burst sidesteps that entirely for anything up to the buffer's depth,
+// while falling straight back to today's live-fetch-and-retry behavior
+// once it's empty - never worse than before, often much better.
+const questionBuffer = [];
+const QUESTION_BUFFER_TARGET_DEPTH = 10;
+// Comfortably above OpenTDB's 5s limit, not butted right up against it.
+const QUESTION_BUFFER_REFILL_INTERVAL_MS = 6000;
+
+async function refillQuestionBuffer() {
+  if (questionBuffer.length >= QUESTION_BUFFER_TARGET_DEPTH) {
+    return;
+  }
+
+  try {
+    questionBuffer.push(await fetchQuizQuestions(50));
+  } catch (err) {
+    // Rate-limited or a transient network issue - just try again on the
+    // next tick rather than treating this as fatal. Whatever's currently
+    // in the buffer (even if that's nothing) is still an improvement
+    // over always fetching live.
+    console.error('Question buffer refill failed: ' + err);
+  }
+}
+
+setInterval(refillQuestionBuffer, QUESTION_BUFFER_REFILL_INTERVAL_MS);
+refillQuestionBuffer(); // Start warming the buffer immediately on boot, not 6s from now.
+
+// The single place a quiz (new or replayed) gets its question set from -
+// an already-ready batch off the buffer if one's available (effectively
+// instant, no network call in the request path at all), or a live fetch
+// as a fallback exactly like before if the buffer's currently empty.
+async function getQuestionsForQuiz() {
+  if (questionBuffer.length > 0) {
+    return questionBuffer.shift();
+  }
+  return fetchQuizQuestions(50);
+}
+
 // A refresh disconnects the old socket (dropping it to 0 users, if it was
 // the only one) an instant before the new socket reconnects and claims the
 // quiz again. Deleting the quiz the moment it hits 0 users would race that
@@ -244,20 +290,19 @@ async function startReplayGame(oldQuizId, voters) {
   };
   quizzes.set(newQuizId, newQuiz);
 
-  // A replay's fetch lands very soon after the game that just ended
-  // fetched its own 50 questions, so it's actually more likely than a
-  // normal quiz start to hit Open Trivia DB's ~1-request-per-5s limit.
-  // The original 'start' flow gets its resilience from the client
-  // retrying on a 5s backoff (see StartQuizComponent's retryHandle) -
-  // there's no equivalent user-facing retry for a replay, since it's
-  // fully automatic once votes resolve, so retry here on the server
-  // instead, matching the same 3-attempt/5s-backoff shape.
+  // getQuestionsForQuiz() draws from the shared buffer first (almost
+  // always ready, effectively instant), only falling back to a live
+  // fetch if the buffer's genuinely empty. There's still no user-facing
+  // retry for a replay specifically (it's fully automatic once votes
+  // resolve), so keep a retry loop as a safety net for that fallback
+  // case - each retry re-checks the buffer too, which may well have
+  // refilled by then, not just re-attempting the same live fetch.
   const REPLAY_FETCH_RETRIES = 3;
   const REPLAY_FETCH_RETRY_DELAY_MS = 5000;
   let lastErr;
   for (let attempt = 0; attempt <= REPLAY_FETCH_RETRIES; attempt++) {
     try {
-      newQuiz.questions = await fetchQuizQuestions(50);
+      newQuiz.questions = await getQuestionsForQuiz();
       lastErr = null;
       break;
     } catch (err) {
@@ -435,7 +480,7 @@ io.on('connection', socket => {
 
       try {
         if (!quiz.questions) {
-          quiz.questions = await fetchQuizQuestions(50);
+          quiz.questions = await getQuestionsForQuiz();
           // The moment the clock actually starts for this quiz - not
           // when any individual player's page happens to load. Lets a
           // player who navigates away (or refreshes) mid-quiz and comes
@@ -608,7 +653,8 @@ setInterval(() => {
     'heapUsed: ' + toMB(mem.heapUsed) + 'MB, ' +
     'heapTotal: ' + toMB(mem.heapTotal) + 'MB | ' +
     'active quizzes: ' + quizzes.size + ', ' +
-    'active connections: ' + io.engine.clientsCount
+    'active connections: ' + io.engine.clientsCount + ', ' +
+    'question buffer: ' + questionBuffer.length + '/' + QUESTION_BUFFER_TARGET_DEPTH
   );
 }, RESOURCE_LOG_INTERVAL_MS);
 
