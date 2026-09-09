@@ -54,48 +54,55 @@ async function fetchQuizQuestions(amount) {
   }));
 }
 
-// A pool of pre-fetched 50-question batches, topped up steadily in the
-// background instead of fetching live at the exact moment someone clicks
-// Start. Open Trivia DB only allows ~1 request per 5s per IP, shared
-// across every quiz on this whole app - fetching on demand means a burst
-// of simultaneous hosts (a Reddit-post spike, say) all race the same
-// 5-second window and most of them lose (a 10-quiz burst test measured
-// 40% needing a manual retry; a 20-quiz burst measured 65%). Drawing
-// from a buffer that was filled gradually during the quiet time *before*
-// a burst sidesteps that entirely for anything up to the buffer's depth,
-// while falling straight back to today's live-fetch-and-retry behavior
-// once it's empty - never worse than before, often much better.
-const questionBuffer = [];
-const QUESTION_BUFFER_TARGET_DEPTH = 10;
+// A rotating pool of pre-fetched 50-question batches, topped up steadily
+// in the background instead of fetching live at the exact moment someone
+// clicks Start. Open Trivia DB only allows ~1 request per 5s per IP,
+// shared across every quiz on this whole app - fetching on demand means
+// a burst of simultaneous hosts (a Reddit-post spike, say) all race the
+// same 5-second window and most of them lose (measured: a 10-quiz burst
+// saw 40% need a manual retry, a 20-quiz burst saw 65%).
+//
+// Quiz-starts *read* from this pool rather than draining it - different
+// quiz rooms never see or interact with each other, and it's fine for
+// two unrelated rooms to occasionally get the same batch (the pool
+// rotates every 6s anyway) - so there's no "ran dry" failure mode at
+// all: any quiz-start succeeds instantly as long as the pool has had at
+// least one batch since boot, which takes well under a second.
+const questionPool = [];
+const QUESTION_POOL_TARGET_DEPTH = 20;
 // Comfortably above OpenTDB's 5s limit, not butted right up against it.
-const QUESTION_BUFFER_REFILL_INTERVAL_MS = 6000;
+const QUESTION_POOL_REFILL_INTERVAL_MS = 6000;
 
-async function refillQuestionBuffer() {
-  if (questionBuffer.length >= QUESTION_BUFFER_TARGET_DEPTH) {
-    return;
-  }
-
+async function refillQuestionPool() {
   try {
-    questionBuffer.push(await fetchQuizQuestions(50));
+    questionPool.push(await fetchQuizQuestions(50));
+    // Evict the oldest once over depth, rather than just stopping once
+    // "full" - keeps the pool perpetually rotating/fresh, since nothing
+    // else drains it anymore.
+    if (questionPool.length > QUESTION_POOL_TARGET_DEPTH) {
+      questionPool.shift();
+    }
   } catch (err) {
     // Rate-limited or a transient network issue - just try again on the
     // next tick rather than treating this as fatal. Whatever's currently
-    // in the buffer (even if that's nothing) is still an improvement
-    // over always fetching live.
-    console.error('Question buffer refill failed: ' + err);
+    // in the pool (even if that's nothing) is still an improvement over
+    // always fetching live.
+    console.error('Question pool refill failed: ' + err);
   }
 }
 
-setInterval(refillQuestionBuffer, QUESTION_BUFFER_REFILL_INTERVAL_MS);
-refillQuestionBuffer(); // Start warming the buffer immediately on boot, not 6s from now.
+setInterval(refillQuestionPool, QUESTION_POOL_REFILL_INTERVAL_MS);
+refillQuestionPool(); // Start warming the pool immediately on boot, not 6s from now.
 
 // The single place a quiz (new or replayed) gets its question set from -
-// an already-ready batch off the buffer if one's available (effectively
-// instant, no network call in the request path at all), or a live fetch
-// as a fallback exactly like before if the buffer's currently empty.
+// a random already-fetched batch from the pool (effectively instant, no
+// network call in the request path, and never removed - other quizzes
+// can draw the same batch) if the pool has anything, or a live fetch as
+// a fallback in the near-impossible case it's still empty (i.e. before
+// the very first fetch completes after a fresh boot).
 async function getQuestionsForQuiz() {
-  if (questionBuffer.length > 0) {
-    return questionBuffer.shift();
+  if (questionPool.length > 0) {
+    return questionPool[Math.floor(Math.random() * questionPool.length)];
   }
   return fetchQuizQuestions(50);
 }
@@ -654,7 +661,7 @@ setInterval(() => {
     'heapTotal: ' + toMB(mem.heapTotal) + 'MB | ' +
     'active quizzes: ' + quizzes.size + ', ' +
     'active connections: ' + io.engine.clientsCount + ', ' +
-    'question buffer: ' + questionBuffer.length + '/' + QUESTION_BUFFER_TARGET_DEPTH
+    'question pool: ' + questionPool.length + '/' + QUESTION_POOL_TARGET_DEPTH
   );
 }, RESOURCE_LOG_INTERVAL_MS);
 
