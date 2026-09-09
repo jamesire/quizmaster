@@ -33,9 +33,19 @@ export class WebsocketService {
 
   connect(): Rx.Subject<MessageEvent> {
     if (!this.socket) {
+      // Production hosting (WP Engine's Headless Platform) doesn't
+      // support WebSockets behind its edge - confirmed directly by WP
+      // Engine, not a bug on our end. Left at Socket.IO's default,
+      // every connection would still try a WebSocket upgrade first,
+      // watch it fail, and only then fall back to polling - wasting a
+      // real, measurable delay (1-2+ seconds in testing) on every
+      // single connection, forever, for an upgrade that can never
+      // succeed. Going straight to polling skips that dead end.
+      const options = { transports: ['polling'] };
+
       // An empty URL means "same origin as this page" - io() with no
       // argument connects to whatever host served the app.
-      this.socket = environment.SOCKET_IO_URL ? io(environment.SOCKET_IO_URL) : io();
+      this.socket = environment.SOCKET_IO_URL ? io(environment.SOCKET_IO_URL, options) : io(options);
       this.socket.on('send', (data) => {
         this.incoming.next(data);
       });
