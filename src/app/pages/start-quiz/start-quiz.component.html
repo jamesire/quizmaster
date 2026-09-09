@@ -80,6 +80,9 @@
                       <span class="badge badge-pill badge-primary px-3 py-2">
                         {{ scores[person] !== undefined ? scores[person] : 'Still playing…' }}
                       </span>
+                      <span class="badge badge-pill badge-warning px-2 py-1 ml-2" *ngIf="sessionWins[person]">
+                        <i class="fas fa-trophy mr-1"></i>{{ sessionWins[person] }}
+                      </span>
                     </li>
                   </ul>
                   <button type="button" class="btn btn-outline-primary mr-2" (click)="copyResults(resultsTooltip)"
@@ -88,6 +91,17 @@
                     <i class="fas fa-copy mr-1"></i>Copy results
                   </button>
                   <button type="button" class="btn btn-primary" (click)="backToDashboard()">Dashboard</button>
+
+                  <div class="mt-3" *ngIf="replayWindowOpen && !replayClosed">
+                    <button type="button" class="btn btn-success mb-2" [disabled]="hasVotedReplay" (click)="voteReplay()">
+                      <i class="fas fa-redo mr-1"></i>{{ hasVotedReplay ? 'Waiting for others…' : 'Replay' }}
+                    </button>
+                    <p class="text-muted small mb-0">
+                      {{ replayVotesList.length }} of {{ partyList.length }} voted to replay &middot; {{ replaySecondsRemaining }}s left
+                    </p>
+                  </div>
+                  <p class="text-danger small mt-2" *ngIf="replayError">{{ replayError }}</p>
+                  <p class="text-muted small mt-3" *ngIf="replayClosed && !replayed">Replay window closed.</p>
                 </div>
               </div>
             </div>

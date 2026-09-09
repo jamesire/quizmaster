@@ -99,9 +99,228 @@ function removeUserFromQuiz(quizId, username) {
   return quiz;
 }
 
+// GAME_DURATION_MS must match secondsForGame in start-quiz.component.ts -
+// it's what the server's own authoritative end-of-game timer is anchored
+// against, separately from (but consistently with) each client's local
+// countdown display.
+const GAME_DURATION_MS = 30000;
+// A client's own 30s timer and the server's are anchored to the same
+// startedAt, but a client's final submitScore still has to cross the
+// network after its timer fires - this buffer gives those in-flight
+// submissions a moment to land before winners are computed. (submitScore
+// also resolves early, below, once every current player is actually in -
+// this buffer is just the worst-case fallback.)
+const GAME_END_GRACE_MS = 2000;
+// How long players get to opt into a rematch after a game ends.
+const REPLAY_VOTE_WINDOW_MS = 15000;
+
+function scheduleGameEnd(quizId) {
+  const quiz = quizzes.get(quizId);
+  if (!quiz || !quiz.startedAt) {
+    return;
+  }
+
+  if (quiz.gameEndHandle) {
+    clearTimeout(quiz.gameEndHandle);
+  }
+  quiz.gameOver = false;
+  const delay = Math.max(quiz.startedAt + GAME_DURATION_MS + GAME_END_GRACE_MS - Date.now(), 0);
+  quiz.gameEndHandle = setTimeout(() => endGame(quizId), delay);
+}
+
+// Pure function (no Map/Set/socket lookups) so it's easy to sanity-check
+// in isolation. Ties for the top score all count as a win; a game where
+// nobody scored above 0 doesn't hand out a phantom win to everyone.
+function computeWinners(scores) {
+  const entries = Object.entries(scores);
+  if (!entries.length) {
+    return [];
+  }
+
+  const maxScore = Math.max(...entries.map(([, s]) => s));
+  if (maxScore <= 0) {
+    return [];
+  }
+
+  return entries.filter(([, s]) => s === maxScore).map(([u]) => u);
+}
+
+// The authoritative "this game just ended" transition - computes and
+// credits the winner(s) into the running session tally, then opens the
+// 15s replay-vote window. Runs once per game regardless of which path
+// triggers it (the scheduled timer, or submitScore's early-resolve
+// check), guarded by quiz.gameOver.
+function endGame(quizId) {
+  const quiz = quizzes.get(quizId);
+  if (!quiz || quiz.gameOver) {
+    return;
+  }
+
+  quiz.gameOver = true;
+  if (quiz.gameEndHandle) {
+    clearTimeout(quiz.gameEndHandle);
+    quiz.gameEndHandle = null;
+  }
+
+  computeWinners(quiz.scores).forEach(u => {
+    quiz.sessionWins[u] = (quiz.sessionWins[u] || 0) + 1;
+  });
+
+  quiz.replayVotes = new Set();
+  quiz.replayResolved = false;
+  quiz.replayed = false;
+  quiz.replayDeadline = Date.now() + REPLAY_VOTE_WINDOW_MS;
+
+  io.sockets.in(quizId).emit('send', {
+    action: 'gameOver',
+    quizId,
+    scores: quiz.scores,
+    sessionWins: quiz.sessionWins,
+    replayDeadline: quiz.replayDeadline
+  });
+
+  quiz.replayHandle = setTimeout(() => resolveReplayVote(quizId), REPLAY_VOTE_WINDOW_MS);
+}
+
+// Resolves the replay-vote window - called either when the 15s timer
+// fires, or as soon as every current player has voted. Idempotent via
+// replayResolved, so whichever path loses that race is a no-op.
+function resolveReplayVote(quizId) {
+  const quiz = quizzes.get(quizId);
+  if (!quiz || quiz.replayResolved) {
+    return;
+  }
+
+  quiz.replayResolved = true;
+  if (quiz.replayHandle) {
+    clearTimeout(quiz.replayHandle);
+    quiz.replayHandle = null;
+  }
+
+  const voters = Array.from(quiz.replayVotes).filter(u => quiz.users.includes(u));
+
+  if (voters.length < 2) {
+    quiz.replayed = false;
+    io.sockets.in(quizId).emit('send', { action: 'replayWindowClosed', quizId, replayed: false });
+    return;
+  }
+
+  quiz.replayed = true;
+  io.sockets.in(quizId).emit('send', { action: 'replayWindowClosed', quizId, replayed: true });
+  // startReplayGame is async but deliberately not awaited here (nothing
+  // in this synchronous handler needs to wait on it) - catch is there so
+  // an unexpected failure inside it logs instead of becoming an unhandled
+  // promise rejection.
+  startReplayGame(quizId, voters).catch(err => console.error('startReplayGame failed for ' + quizId + ': ' + err));
+}
+
+// Spins up a fresh quiz for exactly the players who voted to replay -
+// no lobby, no host, no 3-2-1 countdown, straight into question 1 -
+// carrying the running session win tally forward. Non-voters are left
+// untouched in the old quiz, which the existing scheduleQuizCleanup
+// grace-deletes once it's actually empty.
+async function startReplayGame(oldQuizId, voters) {
+  const oldQuiz = quizzes.get(oldQuizId);
+  if (!oldQuiz) {
+    return;
+  }
+
+  const newQuizId = generateQuizId();
+  const newQuiz = {
+    difficulty: oldQuiz.difficulty,
+    users: [...voters],
+    questions: null,
+    scores: {},
+    startedAt: null,
+    cleanupHandle: null,
+    gameEndHandle: null,
+    gameOver: false,
+    sessionWins: { ...oldQuiz.sessionWins },
+    replayVotes: new Set(),
+    replayDeadline: null,
+    replayHandle: null,
+    replayResolved: false,
+    replayed: false
+  };
+  quizzes.set(newQuizId, newQuiz);
+
+  // A replay's fetch lands very soon after the game that just ended
+  // fetched its own 50 questions, so it's actually more likely than a
+  // normal quiz start to hit Open Trivia DB's ~1-request-per-5s limit.
+  // The original 'start' flow gets its resilience from the client
+  // retrying on a 5s backoff (see StartQuizComponent's retryHandle) -
+  // there's no equivalent user-facing retry for a replay, since it's
+  // fully automatic once votes resolve, so retry here on the server
+  // instead, matching the same 3-attempt/5s-backoff shape.
+  const REPLAY_FETCH_RETRIES = 3;
+  const REPLAY_FETCH_RETRY_DELAY_MS = 5000;
+  let lastErr;
+  for (let attempt = 0; attempt <= REPLAY_FETCH_RETRIES; attempt++) {
+    try {
+      newQuiz.questions = await fetchQuizQuestions(50);
+      lastErr = null;
+      break;
+    } catch (err) {
+      lastErr = err;
+      if (attempt < REPLAY_FETCH_RETRIES) {
+        await new Promise(resolve => setTimeout(resolve, REPLAY_FETCH_RETRY_DELAY_MS));
+      }
+    }
+  }
+  if (lastErr) {
+    console.error('Failed to fetch questions for replay quiz ' + newQuizId + ' after ' + (REPLAY_FETCH_RETRIES + 1) + ' attempts: ' + lastErr);
+    quizzes.delete(newQuizId);
+    io.sockets.in(oldQuizId).emit('send', {
+      action: 'replayFailed',
+      quizId: oldQuizId,
+      message: 'Could not start the replay. Please return to the dashboard and start a new quiz.'
+    });
+    return;
+  }
+  // No +3000 countdown buffer here (unlike the normal 'start' handler) -
+  // a replay drops voters straight into question 1, there's no 3-2-1
+  // beat to account for.
+  newQuiz.startedAt = Date.now();
+  scheduleGameEnd(newQuizId);
+
+  // Move each voter's live connection out of the old room and into the
+  // new one before announcing it, so the room is authoritative the
+  // moment clients hear about it.
+  const oldRoom = io.sockets.adapter.rooms.get(oldQuizId);
+  if (oldRoom) {
+    for (const socketId of Array.from(oldRoom)) {
+      const s = io.sockets.sockets.get(socketId);
+      if (s && voters.includes(s.username)) {
+        s.leave(oldQuizId);
+        s.join(newQuizId);
+        s.quizId = newQuizId;
+      }
+    }
+  }
+
+  oldQuiz.users = oldQuiz.users.filter(u => !voters.includes(u));
+  if (oldQuiz.users.length === 0) {
+    scheduleQuizCleanup(oldQuizId);
+  }
+
+  io.sockets.in(newQuizId).emit('send', { action: 'replayStart', quizId: newQuizId });
+}
+
 io.on('connection', socket => {
   socket.on('disconnect', function () {
     const quiz = removeUserFromQuiz(socket.quizId, socket.username);
+
+    // A player leaving mid-replay-vote-window shouldn't strand everyone
+    // else waiting on a vote (or a "not voted yet" slot) that's never
+    // coming - drop their vote and re-check whether that's now everyone.
+    if (quiz && quiz.gameOver && !quiz.replayResolved) {
+      if (quiz.replayVotes.delete(socket.username)) {
+        io.sockets.in(socket.quizId).emit('send', { action: 'replayVotes', quizId: socket.quizId, votes: Array.from(quiz.replayVotes) });
+      }
+      if (quiz.replayVotes.size >= quiz.users.length) {
+        resolveReplayVote(socket.quizId);
+      }
+    }
 
     const emitData = {
       username: socket.username,
@@ -121,7 +340,22 @@ io.on('connection', socket => {
   socket.on('send', async function (data) {
     if (data.action === 'host') {
       const quizId = generateQuizId();
-      quizzes.set(quizId, { difficulty: data.difficulty, users: [data.username], questions: null, scores: {}, startedAt: null });
+      quizzes.set(quizId, {
+        difficulty: data.difficulty,
+        users: [data.username],
+        questions: null,
+        scores: {},
+        startedAt: null,
+        cleanupHandle: null,
+        gameEndHandle: null,
+        gameOver: false,
+        sessionWins: {},
+        replayVotes: new Set(),
+        replayDeadline: null,
+        replayHandle: null,
+        replayResolved: false,
+        replayed: false
+      });
 
       socket.username = data.username;
       socket.quizId = quizId;
@@ -213,6 +447,7 @@ io.on('connection', socket => {
           // countdown itself ate into the 30s clock, so players actually
           // saw it start at 27.
           quiz.startedAt = Date.now() + 3000;
+          scheduleGameEnd(socket.quizId);
         }
         io.sockets.in(socket.quizId).emit('send', { action: 'start', quizId: socket.quizId, questions: quiz.questions });
       } catch (err) {
@@ -280,7 +515,18 @@ io.on('connection', socket => {
         cancelQuizCleanup(quiz);
       }
 
-      socket.emit('send', { action: 'questions', quizId: data.quizId, questions: quiz.questions, partyList: quiz.users, scores: quiz.scores, startedAt: quiz.startedAt });
+      socket.emit('send', {
+        action: 'questions',
+        quizId: data.quizId,
+        questions: quiz.questions,
+        partyList: quiz.users,
+        scores: quiz.scores,
+        startedAt: quiz.startedAt,
+        sessionWins: quiz.sessionWins,
+        gameOver: quiz.gameOver,
+        replayDeadline: quiz.gameOver ? quiz.replayDeadline : null,
+        replayVotes: quiz.gameOver ? Array.from(quiz.replayVotes) : []
+      });
     }
     else if (data.action === 'submitScore') {
       const quiz = quizzes.get(data.quizId);
@@ -292,6 +538,39 @@ io.on('connection', socket => {
       quiz.scores[data.username] = data.score;
 
       io.sockets.in(data.quizId).emit('send', { action: 'scores', quizId: data.quizId, scores: quiz.scores });
+
+      // Nothing left to wait for once every currently-connected player
+      // actually has a score in and the nominal 30s has elapsed - resolve
+      // right away instead of sitting out the rest of GAME_END_GRACE_MS.
+      if (!quiz.gameOver && quiz.startedAt && Date.now() >= quiz.startedAt + GAME_DURATION_MS
+        && quiz.users.every(u => quiz.scores[u] !== undefined)) {
+        endGame(data.quizId);
+      }
+    }
+    else if (data.action === 'replayVote') {
+      const quiz = quizzes.get(data.quizId);
+
+      if (!quiz || !quiz.gameOver) {
+        return;
+      }
+
+      if (quiz.replayResolved) {
+        // Arrived after the window already closed elsewhere - tell just
+        // this socket so its UI doesn't hang on a vote that'll never
+        // do anything.
+        socket.emit('send', { action: 'replayWindowClosed', quizId: data.quizId, replayed: quiz.replayed });
+        return;
+      }
+      if (!quiz.users.includes(data.username)) {
+        return;
+      }
+
+      quiz.replayVotes.add(data.username);
+      io.sockets.in(data.quizId).emit('send', { action: 'replayVotes', quizId: data.quizId, votes: Array.from(quiz.replayVotes) });
+
+      if (quiz.replayVotes.size >= quiz.users.length) {
+        resolveReplayVote(data.quizId);
+      }
     }
     else {
       console.log('Unspecified action');

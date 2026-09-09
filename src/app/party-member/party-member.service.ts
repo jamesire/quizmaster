@@ -88,4 +88,14 @@ export class PartyMemberService {
     this.partyMembers.next(data);
   }
 
+  voteReplay(quizId, username) {
+    var data = {
+      quizId: quizId,
+      username: username,
+      action: 'replayVote'
+    }
+
+    this.partyMembers.next(data);
+  }
+
 }

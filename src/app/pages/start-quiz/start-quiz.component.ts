@@ -38,31 +38,27 @@ export class StartQuizComponent implements OnInit, OnDestroy {
   public resultsCopied: boolean = false;
   public scoreStarFlip: boolean = false;
   public kicked: boolean = false;
+  public sessionWins: { [username: string]: number } = {};
+  public replayWindowOpen: boolean = false;
+  public replayClosed: boolean = false;
+  public replayed: boolean = false;
+  public replayVotesList: string[] = [];
+  public hasVotedReplay: boolean = false;
+  public replaySecondsRemaining: number = 0;
+  public replayError: string = null;
   private quizId: string;
   private timerHandle: any;
   private subscription: Subscription;
+  private paramSub: Subscription;
   private retryHandle: any;
   private retryAttempts: number = 0;
   private readonly maxAutoRetries: number = 3;
   private scoreStarFlipHandle: any;
+  private replayTimerHandle: any;
 
   constructor(private route: ActivatedRoute, private router: Router, private partyMemberService: PartyMemberService) { }
 
   ngOnInit() {
-    const token = this.route.snapshot.paramMap.get('token');
-    const decoded = token ? QuizLinkToken.decode(token) : null;
-
-    if (!decoded) {
-      // A malformed/hand-edited link, not a transient failure - nothing a
-      // retry would fix.
-      this.loadError = 'This quiz link looks invalid.';
-      this.loadErrorRetryable = false;
-      return;
-    }
-
-    this.quizId = decoded.quizId;
-    this.username = decoded.username;
-
     // The server generates one shared question set per quiz (on "start")
     // and hands it out on request - this is what keeps every player (and
     // a player who refreshes mid-quiz) seeing the same questions in the
@@ -71,7 +67,9 @@ export class StartQuizComponent implements OnInit, OnDestroy {
     // partyMembers is a single app-wide Subject that outlives this
     // component, so this subscription has to be torn down explicitly in
     // ngOnDestroy - otherwise every quiz played in a session leaves
-    // another subscriber behind permanently.
+    // another subscriber behind permanently. Set up exactly once here,
+    // not per-quiz in loadQuiz() below - re-subscribing on every replay
+    // would stack up duplicate listeners on the same shared Subject.
     this.subscription = this.partyMemberService.partyMembers.subscribe(msg => {
       if (msg.action === 'questions' && msg.quizId === this.quizId) {
         this.quizQuestions = QuestionHelper.setAnswerChoices(msg.questions);
@@ -81,6 +79,18 @@ export class StartQuizComponent implements OnInit, OnDestroy {
         this.loadError = null;
         this.retryAttempts = 0;
         this.startGameTimer(msg.startedAt);
+
+        this.sessionWins = msg.sessionWins || {};
+        if (msg.gameOver) {
+          // Landed here (e.g. via a refresh) while the previous game's
+          // replay-vote window is still open - rehydrate straight into
+          // that UI instead of a dead "Time's up" screen with no way to
+          // know a rematch is up for grabs.
+          this.replayWindowOpen = true;
+          this.replayVotesList = msg.replayVotes || [];
+          this.hasVotedReplay = this.replayVotesList.includes(this.username);
+          this.startReplayCountdown(msg.replayDeadline);
+        }
       }
       else if (msg.action === 'scores' && msg.quizId === this.quizId) {
         this.scores = msg.scores;
@@ -92,6 +102,40 @@ export class StartQuizComponent implements OnInit, OnDestroy {
         // overwrite the real one) in the background.
         this.kicked = true;
         this.clearTimer();
+      }
+      else if (msg.action === 'gameOver' && msg.quizId === this.quizId) {
+        this.sessionWins = msg.sessionWins;
+        this.replayWindowOpen = true;
+        this.replayClosed = false;
+        this.startReplayCountdown(msg.replayDeadline);
+      }
+      else if (msg.action === 'replayVotes' && msg.quizId === this.quizId) {
+        this.replayVotesList = msg.votes;
+        this.hasVotedReplay = msg.votes.includes(this.username);
+      }
+      else if (msg.action === 'replayWindowClosed' && msg.quizId === this.quizId) {
+        this.replayWindowOpen = false;
+        this.replayClosed = true;
+        this.replayed = msg.replayed;
+        this.clearReplayTimer();
+      }
+      else if (msg.action === 'replayStart') {
+        // Unlike every other handler here, msg.quizId is deliberately the
+        // NEW quiz's id, not this.quizId (the one just finished) - so it
+        // can never match a "=== this.quizId" filter. No filter is needed
+        // anyway: the server only emits this into the new quiz's room,
+        // which by construction only this player's just-migrated socket
+        // (and fellow voters') belongs to.
+        //
+        // The actual state reset happens in loadQuiz(), triggered by the
+        // paramMap change this navigation causes below - not here, so
+        // there's exactly one reset code path regardless of how a quiz
+        // page gets (re)loaded.
+        const newToken = QuizLinkToken.encode(msg.quizId, this.username);
+        this.router.navigate(['/play', newToken], { replaceUrl: true });
+      }
+      else if (msg.action === 'replayFailed' && msg.quizId === this.quizId) {
+        this.replayError = msg.message;
       }
       else if (msg.action === 'error') {
         console.error('Start quiz message: ' + msg.message);
@@ -107,13 +151,84 @@ export class StartQuizComponent implements OnInit, OnDestroy {
       }
     });
 
+    // Angular reuses this same component instance across navigations
+    // between two routes that match the same path (e.g. /play/:oldToken
+    // -> /play/:newToken after a replay) rather than destroying and
+    // recreating it - so a one-shot route.snapshot read here would only
+    // ever see the very first quiz. Subscribing to paramMap instead means
+    // every subsequent replay navigation re-runs loadQuiz() too, and it
+    // fires immediately with the current value on this first subscribe,
+    // same as a snapshot read would have.
+    this.paramSub = this.route.paramMap.subscribe(params => {
+      this.loadQuiz(params.get('token'));
+    });
+  }
+
+  // Loads (or reloads, after a replay) the quiz named by the given
+  // /play/:token - resets every piece of per-game state first, so a
+  // replay's fresh questionIndex/score/leaderboard/etc. don't inherit
+  // anything left over from the game that just finished.
+  private loadQuiz(token: string) {
+    this.clearTimer();
+    this.clearReplayTimer();
+    if (this.retryHandle) {
+      clearTimeout(this.retryHandle);
+      this.retryHandle = null;
+    }
+    if (this.scoreStarFlipHandle) {
+      clearTimeout(this.scoreStarFlipHandle);
+      this.scoreStarFlipHandle = null;
+    }
+
+    this.questionIndex = 0;
+    this.isLoaded = false;
+    this.isFinished = false;
+    this.answerIsSelected = false;
+    this.quizQuestions = undefined;
+    this.css = [];
+    this.score = 0;
+    this.partyList = [];
+    this.scores = {};
+    this.loadError = null;
+    this.loadErrorRetryable = false;
+    this.answerHistory = [];
+    this.resultsCopied = false;
+    this.scoreStarFlip = false;
+    this.kicked = false;
+    this.retryAttempts = 0;
+    this.sessionWins = {};
+    this.replayWindowOpen = false;
+    this.replayClosed = false;
+    this.replayed = false;
+    this.replayVotesList = [];
+    this.hasVotedReplay = false;
+    this.replaySecondsRemaining = 0;
+    this.replayError = null;
+
+    const decoded = token ? QuizLinkToken.decode(token) : null;
+
+    if (!decoded) {
+      // A malformed/hand-edited link, not a transient failure - nothing a
+      // retry would fix.
+      this.loadError = 'This quiz link looks invalid.';
+      this.loadErrorRetryable = false;
+      return;
+    }
+
+    this.quizId = decoded.quizId;
+    this.username = decoded.username;
+
     this.partyMemberService.getQuestions(this.quizId, this.username);
   }
 
   ngOnDestroy() {
     this.clearTimer();
+    this.clearReplayTimer();
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+    if (this.paramSub) {
+      this.paramSub.unsubscribe();
     }
     if (this.retryHandle) {
       clearTimeout(this.retryHandle);
@@ -225,7 +340,37 @@ export class StartQuizComponent implements OnInit, OnDestroy {
     this.partyMemberService.submitScore(this.quizId, this.username, this.score);
   }
 
+  voteReplay() {
+    if (this.hasVotedReplay) {
+      return;
+    }
+    this.hasVotedReplay = true;
+    this.partyMemberService.voteReplay(this.quizId, this.username);
+  }
+
+  // Same anchor-timestamp pattern as startGameTimer above - the deadline
+  // comes from the server, not a client-only count from zero, so it stays
+  // correct even across a refresh partway through the window.
+  private startReplayCountdown(deadline: number) {
+    this.clearReplayTimer();
+    const tick = () => this.replaySecondsRemaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+    tick();
+    this.replayTimerHandle = setInterval(tick, 1000);
+  }
+
+  private clearReplayTimer() {
+    if (this.replayTimerHandle) {
+      clearInterval(this.replayTimerHandle);
+      this.replayTimerHandle = null;
+    }
+  }
+
   backToDashboard() {
+    // Otherwise a player who leaves without voting stays counted in
+    // quiz.users server-side (until their socket eventually disconnects
+    // on its own), which could stall the "everyone's voted" early-resolve
+    // check for whoever's still waiting on the replay window.
+    this.partyMemberService.leaveQuiz(this.username, this.quizId);
     this.router.navigate(['/']);
   }
 
