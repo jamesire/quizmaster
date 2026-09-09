@@ -167,7 +167,7 @@
         <p class="text-uppercase text-muted small mb-1">Quiz ID</p>
         <span class="h2 font-weight-bold text-primary">{{quizId}}</span>
         <button type="button" class="btn btn-link p-0 ml-2 align-baseline" ngxClipboard [cbContent]="quizId"
-          (cbOnSuccess)="quizIdCopied = true" placement="top" triggers="hover focus click"
+          (cbOnSuccess)="quizIdCopied = true" placement="top" triggers="hover focus click" container="body"
           ngbTooltip="{{ quizIdCopied ? 'Copied!' : 'Copy' }}">
           <i class="fas fa-copy"></i>
         </button>
