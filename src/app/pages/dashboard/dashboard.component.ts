@@ -293,10 +293,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.partyMemberService.hostQuiz(username, this.selectedDifficulty.index);
   }
 
-  async copyQuizId() {
+  async copyQuizId(tooltip?: any) {
+    let copied = false;
+
     try {
       await navigator.clipboard.writeText(this.quizId);
-      this.quizIdCopied = true;
+      copied = true;
     } catch (err) {
       // navigator.clipboard isn't available on every browser/context
       // (e.g. older browsers, or a non-secure origin) - fall back to
@@ -312,10 +314,35 @@ export class DashboardComponent implements OnInit, OnDestroy {
         textarea.select();
         document.execCommand('copy');
         document.body.removeChild(textarea);
-        this.quizIdCopied = true;
+        copied = true;
       } catch (fallbackErr) {
         console.error('Clipboard fallback also failed: ' + fallbackErr);
       }
+    }
+
+    if (!copied) {
+      return;
+    }
+
+    this.quizIdCopied = true;
+
+    // ngb-tooltip only re-reads its content when it (re)opens - it
+    // doesn't refresh already-visible content when the bound string
+    // changes, so without this the "Copied!" text wouldn't show until
+    // the cursor left and came back. Forcing a close+reopen picks up
+    // the new text immediately, right where the cursor already is.
+    //
+    // The setTimeout matters: change detection hasn't actually pushed
+    // the new "Copied!" string into the tooltip directive's own input
+    // yet at this exact point in the same synchronous tick - closing
+    // and reopening immediately would just recreate it with the stale
+    // "Copy" text. Deferring to a new task gives Angular's zone a
+    // chance to flush that update first.
+    if (tooltip) {
+      setTimeout(() => {
+        tooltip.close();
+        tooltip.open();
+      });
     }
   }
 }
