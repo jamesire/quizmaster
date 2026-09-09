@@ -18,23 +18,21 @@
                 <div class="col text-center py-5">
                   <p class="text-danger mb-3">{{loadError}}</p>
                   <button *ngIf="loadErrorRetryable" type="button" class="btn btn-primary" (click)="retryLoad()">Retry now</button>
-                  <button *ngIf="!loadErrorRetryable" type="button" class="btn btn-primary" (click)="backToDashboard()">Back to dashboard</button>
+                  <button *ngIf="!loadErrorRetryable" type="button" class="btn btn-primary" (click)="backToDashboard()">Dashboard</button>
                 </div>
               </div>
               <ng-container *ngIf="isLoaded && !isFinished">
-                <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center justify-content-between mb-3 quiz-header-row">
                   <span class="badge badge-pill badge-light text-primary font-weight-bold px-3 py-2">
                     Question {{questionIndex + 1}}
                   </span>
-                  <div class="d-flex align-items-center">
-                    <span class="badge badge-pill badge-light font-weight-bold px-3 py-2 mr-2">
-                      <i class="fas fa-star text-warning mr-1"></i>{{score}}
-                    </span>
-                    <span class="badge badge-pill px-3 py-2 font-weight-bold text-white timer-badge"
-                      [ngClass]="secondsRemaining <= 10 ? 'bg-danger' : 'bg-warning'">
-                      <i class="fas fa-clock mr-1"></i>{{secondsRemaining}}
-                    </span>
-                  </div>
+                  <span class="badge badge-pill px-3 py-2 font-weight-bold text-white timer-badge"
+                    [ngClass]="secondsRemaining <= 10 ? 'bg-danger' : 'bg-warning'">
+                    <i class="fas fa-clock mr-1"></i>{{secondsRemaining}}
+                  </span>
+                  <span class="badge badge-pill badge-light font-weight-bold px-3 py-2">
+                    <i class="fas fa-star text-warning mr-1"></i>{{score}}
+                  </span>
                 </div>
                 <div class="row">
                   <div class="col">
@@ -82,7 +80,7 @@
                     ngbTooltip="{{ resultsCopied ? 'Copied!' : 'Copy results' }}">
                     <i class="fas fa-copy mr-1"></i>Copy results
                   </button>
-                  <button type="button" class="btn btn-primary" (click)="backToDashboard()">Back to dashboard</button>
+                  <button type="button" class="btn btn-primary" (click)="backToDashboard()">Dashboard</button>
                 </div>
               </div>
             </div>

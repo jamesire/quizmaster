@@ -44,10 +44,23 @@
     border: none;
 }
 
+.quiz-header-row {
+    position: relative;
+}
+
 .timer-badge {
     transition: background-color .4s;
     font-size: 1.15rem;
     min-width: 3.25rem;
+
+    // Taken out of the row's normal flex flow and centered on the row
+    // itself, rather than centered between whatever the Question and
+    // Score badges happen to measure - keeps it dead-center regardless
+    // of how wide "Question 1" vs "Question 12" ends up being.
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .answer-btn {
