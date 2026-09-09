@@ -44,6 +44,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public countdown: number = null;
   public startingQuiz: boolean = false;
   public startError: string = null;
+  public joinNameError: boolean = false;
+  public hostNameError: boolean = false;
   public quizIdCopied: boolean = false;
   public readonly difficulties: string[] = [
     "Any",
@@ -270,6 +272,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   joinQuiz(quizId, username) {
+    if (!this.isValidName(username)) {
+      this.joinNameError = true;
+      return;
+    }
+    this.joinNameError = false;
+
     this.modalService.dismissAll();
 
     this.username = username;
@@ -283,6 +291,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   hostQuiz(username: string) {
+    if (!this.isValidName(username)) {
+      this.hostNameError = true;
+      return;
+    }
+    this.hostNameError = false;
+
     this.modalService.dismissAll();
 
     this.username = username;
@@ -344,5 +358,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         tooltip.open();
       });
     }
+  }
+
+  private isValidName(name: string): boolean {
+    return !!name && name.trim().length >= 2;
   }
 }
