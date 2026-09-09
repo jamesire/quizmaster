@@ -11,6 +11,7 @@ import { ɵHttpInterceptingHandler } from '@angular/common/http';
 import { interval, Subscription, Subject } from 'rxjs';
 import { PartyMemberService } from 'src/app/party-member/party-member.service';
 import { QuestionHelper } from 'src/app/models/QuestionHelper';
+import { ClipboardHelper } from 'src/app/models/ClipboardHelper';
 import { CommonModule } from '@angular/common';  
 import { BrowserModule } from '@angular/platform-browser';
 
@@ -308,56 +309,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   async copyQuizId(tooltip?: any) {
-    let copied = false;
-
-    try {
-      await navigator.clipboard.writeText(this.quizId);
-      copied = true;
-    } catch (err) {
-      // navigator.clipboard isn't available on every browser/context
-      // (e.g. older browsers, or a non-secure origin) - fall back to
-      // the old select-and-execCommand approach rather than fail
-      // silently.
-      console.error('navigator.clipboard.writeText failed, falling back: ' + err);
-      try {
-        const textarea = document.createElement('textarea');
-        textarea.value = this.quizId;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        copied = true;
-      } catch (fallbackErr) {
-        console.error('Clipboard fallback also failed: ' + fallbackErr);
-      }
-    }
-
-    if (!copied) {
+    if (!(await ClipboardHelper.copy(this.quizId))) {
       return;
     }
-
     this.quizIdCopied = true;
-
-    // ngb-tooltip only re-reads its content when it (re)opens - it
-    // doesn't refresh already-visible content when the bound string
-    // changes, so without this the "Copied!" text wouldn't show until
-    // the cursor left and came back. Forcing a close+reopen picks up
-    // the new text immediately, right where the cursor already is.
-    //
-    // The setTimeout matters: change detection hasn't actually pushed
-    // the new "Copied!" string into the tooltip directive's own input
-    // yet at this exact point in the same synchronous tick - closing
-    // and reopening immediately would just recreate it with the stale
-    // "Copy" text. Deferring to a new task gives Angular's zone a
-    // chance to flush that update first.
-    if (tooltip) {
-      setTimeout(() => {
-        tooltip.close();
-        tooltip.open();
-      });
-    }
+    ClipboardHelper.refreshTooltip(tooltip);
   }
 
   private isValidName(name: string): boolean {

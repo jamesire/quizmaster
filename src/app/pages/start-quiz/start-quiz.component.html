@@ -75,6 +75,11 @@
                       </tr>
                     </tbody>
                   </table>
+                  <button type="button" class="btn btn-outline-primary mr-2" (click)="copyResults(resultsTooltip)"
+                    #resultsTooltip="ngbTooltip" placement="top" triggers="hover focus click" container="body"
+                    ngbTooltip="{{ resultsCopied ? 'Copied!' : 'Copy results' }}">
+                    <i class="fas fa-copy mr-1"></i>Copy results
+                  </button>
                   <button type="button" class="btn btn-primary" (click)="backToDashboard()">Back to dashboard</button>
                 </div>
               </div>

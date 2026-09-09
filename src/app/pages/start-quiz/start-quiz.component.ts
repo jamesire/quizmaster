@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { PartyMemberService } from 'src/app/party-member/party-member.service';
 import { Question } from 'src/app/models/Question';
 import { QuestionHelper } from 'src/app/models/QuestionHelper';
+import { ClipboardHelper } from 'src/app/models/ClipboardHelper';
 
 @Component({
   selector: 'app-start-quiz',
@@ -32,6 +33,8 @@ export class StartQuizComponent implements OnInit, OnDestroy {
   public username: string;
   public loadError: string = null;
   public loadErrorRetryable: boolean = false;
+  public answerHistory: boolean[] = [];
+  public resultsCopied: boolean = false;
   private quizId: string;
   private timerHandle: any;
   private subscription: Subscription;
@@ -112,7 +115,10 @@ export class StartQuizComponent implements OnInit, OnDestroy {
       this.css[index] = answer.isCorrect ? "correct-answer" : "incorrect-answer";
     });
 
-    if (this.quizQuestions[this.questionIndex].allAnswers[i].isCorrect) {
+    const isCorrect = this.quizQuestions[this.questionIndex].allAnswers[i].isCorrect;
+    this.answerHistory.push(isCorrect);
+
+    if (isCorrect) {
       this.score++;
     }
 
@@ -181,5 +187,37 @@ export class StartQuizComponent implements OnInit, OnDestroy {
 
   getSortedParty(): string[] {
     return [...this.partyList].sort((a, b) => (this.scores[b] || 0) - (this.scores[a] || 0));
+  }
+
+  // Builds a Wordle/Poople-style shareable summary: a row of squares for
+  // this player's own answers (without spoiling the actual questions),
+  // followed by the party's scoreboard - meant to be pasted into a chat
+  // to brag/compare, same spirit as those games' own share buttons.
+  async copyResults(tooltip?: any) {
+    const squares = this.answerHistory.map(correct => correct ? '🟩' : '🟥');
+    const rows: string[] = [];
+    for (let i = 0; i < squares.length; i += 5) {
+      rows.push(squares.slice(i, i + 5).join(''));
+    }
+
+    const leaderboard = this.getSortedParty().map(person => {
+      const score = this.scores[person] !== undefined ? this.scores[person] : '-';
+      return person + ': ' + score + (person === this.username ? ' (you)' : '');
+    });
+
+    const lines = [
+      '🧠 Quizmaster · Quiz ' + this.quizId,
+      '',
+      ...(rows.length ? [rows.join('\n'), ''] : []),
+      ...leaderboard,
+      '',
+      'Play at ' + window.location.origin
+    ];
+
+    if (!(await ClipboardHelper.copy(lines.join('\n')))) {
+      return;
+    }
+    this.resultsCopied = true;
+    ClipboardHelper.refreshTooltip(tooltip);
   }
 }
