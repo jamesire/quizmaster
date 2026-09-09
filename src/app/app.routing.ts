@@ -41,7 +41,14 @@ const routes: Routes =[
   imports: [
     CommonModule,
     BrowserModule,
-    RouterModule.forRoot(routes)
+    // scrollPositionRestoration: 'top' - jump to the top of the page on
+    // every forward navigation (dashboard -> quiz lobby countdown ->
+    // start-quiz, "Back to dashboard", etc.), so a user who'd scrolled
+    // down (e.g. to reach the Join/Host cards on mobile) doesn't land
+    // mid-page on the next screen. Back/forward browser navigation still
+    // restores the scroll position it had, which is Angular's default
+    // pairing for this option.
+    RouterModule.forRoot(routes, { scrollPositionRestoration: 'top' })
   ],
   exports: [
   ],
