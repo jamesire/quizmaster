@@ -292,4 +292,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // "hosted" case in the ngOnInit subscription above).
     this.partyMemberService.hostQuiz(username, this.selectedDifficulty.index);
   }
+
+  async copyQuizId() {
+    try {
+      await navigator.clipboard.writeText(this.quizId);
+      this.quizIdCopied = true;
+    } catch (err) {
+      // navigator.clipboard isn't available on every browser/context
+      // (e.g. older browsers, or a non-secure origin) - fall back to
+      // the old select-and-execCommand approach rather than fail
+      // silently.
+      console.error('navigator.clipboard.writeText failed, falling back: ' + err);
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = this.quizId;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        this.quizIdCopied = true;
+      } catch (fallbackErr) {
+        console.error('Clipboard fallback also failed: ' + fallbackErr);
+      }
+    }
+  }
 }
