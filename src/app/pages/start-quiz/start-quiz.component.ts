@@ -206,7 +206,7 @@ export class StartQuizComponent implements OnInit, OnDestroy {
     });
 
     const lines = [
-      '🧠 Quizmaster · Quiz ' + this.quizId,
+      '🧠 Quizmastr · Quiz ' + this.quizId,
       '',
       ...(rows.length ? [rows.join('\n'), ''] : []),
       ...leaderboard,
