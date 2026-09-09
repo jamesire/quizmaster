@@ -1,20 +1,10 @@
 <div class="pb-8 pt-md-6">
-  <div class="container pb-4">
-    <div class="row">
-      <div class="col text-center">
-        <div class="icon icon-shape timer-shape text-white rouded-square shadow"
-          [ngClass]="isLoaded && !isFinished && secondsRemaining <= 10 ? 'bg-danger' : 'bg-warning'">
-          <span *ngIf="isLoaded && !isFinished" class="h4 font-weight-bold mb-0 text-white">{{secondsRemaining}}</span>
-        </div>
-      </div>
-    </div>
-  </div>
   <div class="container-fluid">
     <div class="header-body">
       <!-- Card stats -->
       <div class="row">
         <div class="mx-auto">
-          <div class="card card-stats mb-4 mb-xl-0">
+          <div class="card card-stats quiz-card shadow mb-4 mb-xl-0">
             <div class="card-body">
               <div *ngIf="!isLoaded && !isFinished && !loadError" class="row">
                 <div class="col text-center py-5">
@@ -32,9 +22,22 @@
                 </div>
               </div>
               <ng-container *ngIf="isLoaded && !isFinished">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <span class="badge badge-pill badge-light text-primary font-weight-bold px-3 py-2">
+                    Question {{questionIndex + 1}}
+                  </span>
+                  <div class="d-flex align-items-center">
+                    <span class="badge badge-pill badge-light font-weight-bold px-3 py-2 mr-2">
+                      <i class="fas fa-star text-warning mr-1"></i>{{score}}
+                    </span>
+                    <span class="badge badge-pill px-3 py-2 font-weight-bold text-white timer-badge"
+                      [ngClass]="secondsRemaining <= 10 ? 'bg-danger' : 'bg-warning'">
+                      <i class="fas fa-clock mr-1"></i>{{secondsRemaining}}s
+                    </span>
+                  </div>
+                </div>
                 <div class="row">
                   <div class="col">
-                    <h5 class="card-title text-uppercase text-muted mb-0">Question {{questionIndex + 1}}.</h5>
                     <span class="h2 font-weight-bold mb-0"
                       [ngClass]="answerIsSelected && [makeOpaque]">{{quizQuestions[questionIndex].question}}</span>
                   </div>
@@ -47,7 +50,7 @@
                     <div *ngFor="let answer of quizQuestions[questionIndex].allAnswers; let i = index;"
                       class="btn-group btn-group-toggle w-50" ngbRadioGroup name="radioBasic" [(ngModel)]="model"
                       [ngClass]="answerIsSelected && [makeOpaque]">
-                      <label ngbButtonLabel class="btn-primary btn-block m-1" [ngClass]="answerIsSelected && [css[i]]"
+                      <label ngbButtonLabel class="btn-primary btn-block answer-btn m-1" [ngClass]="answerIsSelected && [css[i]]"
                         [value]="[i]" (click)="checkAnswer(i)">
                         {{answer.text}}
                       </label>
@@ -60,21 +63,20 @@
               </ng-container>
               <div *ngIf="isFinished" class="row">
                 <div class="col text-center">
-                  <h5 class="card-title text-uppercase text-muted mb-3">Time's up!</h5>
-                  <table class="table">
-                    <thead>
-                      <tr>
-                        <th>Player</th>
-                        <th>Score</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr *ngFor="let person of getSortedParty()" [class.font-weight-bold]="person === username">
-                        <td>{{person}}</td>
-                        <td>{{ scores[person] !== undefined ? scores[person] : 'Still playing…' }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <h5 class="card-title text-uppercase text-muted mb-1">Time's up!</h5>
+                  <p class="text-muted mb-4">Here's how everyone did</p>
+                  <ul class="list-group list-group-flush text-left mb-4 leaderboard-list">
+                    <li class="list-group-item d-flex align-items-center px-0"
+                      *ngFor="let person of getSortedParty(); let i = index"
+                      [class.font-weight-bold]="person === username">
+                      <span class="rank-badge mr-3" [ngClass]="i === 0 ? 'bg-warning' : 'bg-secondary'">{{i + 1}}</span>
+                      <i class="fas fa-user-circle text-muted mr-2"></i>
+                      <span class="flex-grow-1">{{person}}<span *ngIf="person === username" class="text-muted font-weight-normal"> (you)</span></span>
+                      <span class="badge badge-pill badge-primary px-3 py-2">
+                        {{ scores[person] !== undefined ? scores[person] : 'Still playing…' }}
+                      </span>
+                    </li>
+                  </ul>
                   <button type="button" class="btn btn-outline-primary mr-2" (click)="copyResults(resultsTooltip)"
                     #resultsTooltip="ngbTooltip" placement="top" triggers="hover focus click" container="body"
                     ngbTooltip="{{ resultsCopied ? 'Copied!' : 'Copy results' }}">
@@ -86,13 +88,6 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-  <div class="container-fluid pt-6" *ngIf="!isFinished">
-    <div class="row">
-      <div class="col text-center">
-        <button type="button" class="btn btn-primary">{{score}}</button>
       </div>
     </div>
   </div>

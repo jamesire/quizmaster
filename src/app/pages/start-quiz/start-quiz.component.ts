@@ -202,7 +202,7 @@ export class StartQuizComponent implements OnInit, OnDestroy {
 
     const leaderboard = this.getSortedParty().map(person => {
       const score = this.scores[person] !== undefined ? this.scores[person] : '-';
-      return person + ': ' + score + (person === this.username ? ' (you)' : '');
+      return person + ': ' + score;
     });
 
     const lines = [

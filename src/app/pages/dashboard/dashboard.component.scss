@@ -1,6 +1,19 @@
 .card-height {
     min-height: 350px;
     height: 350px; /* cross-browser */
+    border-radius: 1rem;
+    border: none;
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.card-height:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 1.5rem 2.5rem rgba(0, 0, 0, .3);
+}
+
+.trivia-card {
+    border-radius: 1rem;
+    border: none;
 }
 
 @media (max-width: 575.98px) {
@@ -31,6 +44,17 @@
         transform: scale(1.2);
         transition-duration: .4s;
     }
+}
+
+.answer-btn {
+    border-radius: .75rem !important;
+    padding: .9rem 1rem !important;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.answer-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
 }
 
 .correct-answer {

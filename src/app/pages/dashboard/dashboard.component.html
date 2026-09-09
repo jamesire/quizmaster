@@ -4,7 +4,7 @@
       <!-- Card stats -->
       <div class="row">
         <div class="mx-auto">
-          <div class="card card-stats mb-4 mb-xl-0">
+          <div class="card card-stats trivia-card shadow mb-4 mb-xl-0">
             <div class="card-body">
               <div *ngIf="!isLoaded" class="row">
                 <div class="col text-center py-4">
@@ -16,7 +16,9 @@
               <ng-container *ngIf="isLoaded">
                 <div class="row">
                   <div class="col">
-                    <h5 class="card-title text-uppercase text-muted mb-0">Random Trivia...</h5>
+                    <h5 class="card-title text-uppercase text-muted mb-0">
+                      <i class="fas fa-dice text-primary mr-1"></i>Random Trivia...
+                    </h5>
                     <span class="h2 font-weight-bold mb-0"
                       [ngClass]="answerIsSelected && [makeOpaque]">{{randomQuestion.question}}</span>
                   </div>
@@ -28,7 +30,7 @@
                     </p> -->
                     <div *ngFor="let answer of randomQuestion.allAnswers; let i = index;" class="btn-group btn-group-toggle w-50"
                       ngbRadioGroup name="radioBasic" [(ngModel)]="model" [ngClass]="answerIsSelected && [makeOpaque]">
-                      <label ngbButtonLabel class="btn-primary btn-block m-1" [ngClass]="answerIsSelected && [css[i]]"
+                      <label ngbButtonLabel class="btn-primary btn-block answer-btn m-1" [ngClass]="answerIsSelected && [css[i]]"
                         [value]="[i]" (click)="checkAnswer(i)">
                         {{answer.text}}
                       </label>
@@ -126,7 +128,7 @@
       </button>
     </div>
     <div class="modal-body">
-      <p class="text-muted">Quick-fire quiz &middot; up to 4 players &middot; 30 seconds &middot; unlimited questions.</p>
+      <p class="text-muted">Answer as many questions as you can in 30 seconds.</p>
       <form>
         <div class="form-group">
           <label class="form-control-label">Your name</label>

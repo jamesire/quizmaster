@@ -44,10 +44,42 @@
     top: 10%;
 }
 
-.timer-shape {
-    width: 48px;
-    height: 48px;
+.quiz-card {
+    border-radius: 1rem;
+    border: none;
+}
+
+.timer-badge {
     transition: background-color .4s;
+}
+
+.answer-btn {
+    border-radius: .75rem !important;
+    padding: .9rem 1rem !important;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.answer-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+}
+
+.leaderboard-list .list-group-item {
+    border-left: 0;
+    border-right: 0;
+}
+
+.rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 700;
+    flex-shrink: 0;
 }
 
 #overlay {
