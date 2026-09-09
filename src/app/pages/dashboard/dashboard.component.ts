@@ -44,6 +44,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public countdown: number = null;
   public startingQuiz: boolean = false;
   public startError: string = null;
+  public quizIdCopied: boolean = false;
   public readonly difficulties: string[] = [
     "Any",
     "Easy",
@@ -274,6 +275,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.username = username;
     this.quizId = quizId;
     this.userIsHost = false;
+    this.quizIdCopied = false;
 
     // The party modal opens once the server confirms the join (see the
     // "join"/"error" cases in the ngOnInit subscription above).
@@ -284,6 +286,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.modalService.dismissAll();
 
     this.username = username;
+    this.quizIdCopied = false;
 
     // The party modal opens once the server assigns a quiz ID (see the
     // "hosted" case in the ngOnInit subscription above).
