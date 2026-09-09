@@ -1,31 +1,38 @@
-.card-height {
-    min-height: 350px;
-    height: 350px; /* cross-browser */
-    border-radius: 1rem;
-    border: none;
-    transition: transform .25s ease, box-shadow .25s ease;
-}
-
-.card-height:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 1.5rem 2.5rem rgba(0, 0, 0, .3);
-}
-
 .trivia-card {
     border-radius: 1rem;
     border: none;
 }
 
-@media (max-width: 575.98px) {
-    .card-height {
-        // A fixed height here previously clipped the icon + text (it needs
-        // more room than a small fixed box allows once it wraps to 2-3
-        // lines on a narrow screen), spilling content out past the card's
-        // bottom edge. height: auto lets the card size to whatever its
-        // content actually needs, with min-height only as a floor.
-        height: auto;
-        min-height: 180px;
-    }
+.cta-card {
+    border-radius: 1rem;
+    border: none;
+    background: #fff;
+    height: 100%;
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.cta-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 1.5rem 2.5rem rgba(0, 0, 0, .12) !important;
+}
+
+.cta-icon-badge {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: #fff;
+}
+
+.cta-icon-success {
+    background: linear-gradient(87deg, #2dce89, #2dcecc);
+}
+
+.cta-icon-warning {
+    background: linear-gradient(87deg, #fb6340, #fbb140);
 }
 
 .clickable {
@@ -74,10 +81,6 @@
     transition-duration: 2s;
     opacity: 0;
     visibility: hidden;
-}
-
-.bleed {
-    top: 10%; 
 }
 
 #overlay {

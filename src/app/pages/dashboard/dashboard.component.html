@@ -50,30 +50,28 @@
 </div>
 <div class="container-fluid mt--7">
   <div class="row">
-    <div class="col transforms mx-auto" data-toggle="modal" data-target="#joinQuizModal"
-      (click)="openModal(joinQuizModal)">
-      <div class="card card-height bg-gradient-success shadow clickable bleed">
-        <h3 class="card-header bg-transparent mx-auto border-0 pt-7">
-          <i class="fas fa-check-circle fa-3x"></i>
-        </h3>
-        <div class="card-body">
-          <p class="card-text text-center font-weight-bold">
-            Join a quiz with an ID provided by your Quizmastr host.
-          </p>
+    <div class="col mx-auto" (click)="openModal(joinQuizModal)">
+      <div class="card cta-card shadow clickable">
+        <div class="card-body text-center py-5">
+          <div class="cta-icon-badge cta-icon-success mx-auto mb-3">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <h4 class="font-weight-bold mb-2">Join a Quiz</h4>
+          <p class="text-muted mb-4">Got a code from your host? Jump right in.</p>
+          <span class="btn btn-outline-success btn-sm rounded-pill px-4 mb-0">Join Quiz</span>
         </div>
       </div>
     </div>
 
-    <div class="col transforms mx-auto" data-toggle="modal" data-target="#hostQuizModal"
-      (click)="openModal(hostQuizModal)">
-      <div class="card card-height bg-gradient-warning shadow clickable bleed">
-        <h3 class="card-header bg-transparent mx-auto border-0 pt-7">
-          <i class="fas fa-list-alt fa-3x"></i>
-        </h3>
-        <div class="card-body">
-          <p class="card-text text-center font-weight-bold">
-            Host a quiz and play against your friends.
-          </p>
+    <div class="col mx-auto" (click)="openModal(hostQuizModal)">
+      <div class="card cta-card shadow clickable">
+        <div class="card-body text-center py-5">
+          <div class="cta-icon-badge cta-icon-warning mx-auto mb-3">
+            <i class="fas fa-list-alt"></i>
+          </div>
+          <h4 class="font-weight-bold mb-2">Host a Quiz</h4>
+          <p class="text-muted mb-4">Play against your friends, up to 4 players.</p>
+          <span class="btn btn-outline-warning btn-sm rounded-pill px-4 mb-0">Host Quiz</span>
         </div>
       </div>
     </div>
@@ -87,7 +85,8 @@
       </button>
     </div>
     <div class="modal-body">
-      <p class="text-muted">Enter the quiz ID from your host, then pick a name.</p>
+      <p class="text-muted mb-1">Enter the quiz ID from your host, then pick a name.</p>
+      <p class="text-muted small mb-3"><i class="fas fa-clock mr-1"></i>Answer as many questions as you can in 30 seconds.</p>
       <form>
         <div class="form-group">
           <label class="form-control-label">Quiz ID</label>
