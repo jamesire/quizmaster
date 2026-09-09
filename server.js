@@ -148,7 +148,7 @@ io.on('connection', socket => {
         socket.emit('send', { action: 'error', message: 'That username is already taken in this quiz.' });
         return;
       }
-      if (quiz.users.length >= 4) {
+      if (quiz.users.length >= 8) {
         socket.emit('send', { action: 'error', message: 'This quiz is full.' });
         return;
       }
