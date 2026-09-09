@@ -4,13 +4,12 @@
   "scripts": {
     "ng": "ng",
     "start": "node server.js",
-    "build": "NODE_OPTIONS=--openssl-legacy-provider ng build",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start",
-    "devStart": "nodemon server.js",
-    "postinstall": "NODE_OPTIONS=--openssl-legacy-provider npm run ng build -- --prod"
+    "devStart": "nodemon server.js"
   },
   "private": true,
   "dependencies": {
