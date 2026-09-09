@@ -182,7 +182,7 @@ export class StartQuizComponent implements OnInit, OnDestroy {
   }
 
   backToDashboard() {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/']);
   }
 
   getSortedParty(): string[] {

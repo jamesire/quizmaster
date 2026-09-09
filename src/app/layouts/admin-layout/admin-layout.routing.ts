@@ -9,7 +9,7 @@ import { JoinQuizComponent } from 'src/app/pages/join-quiz/join-quiz.component';
 import { StartQuizComponent } from 'src/app/pages/start-quiz/start-quiz.component';
 
 export const AdminLayoutRoutes: Routes = [
-    { path: 'dashboard',      component: DashboardComponent },
+    { path: '',               component: DashboardComponent },
     { path: 'startQuiz/:quizId/:username', component: StartQuizComponent },
     { path: 'user-profile',   component: UserProfileComponent },
     { path: 'tables',         component: TablesComponent },
