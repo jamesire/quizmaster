@@ -12,6 +12,7 @@ import { interval, Subscription, Subject } from 'rxjs';
 import { PartyMemberService } from 'src/app/party-member/party-member.service';
 import { QuestionHelper } from 'src/app/models/QuestionHelper';
 import { ClipboardHelper } from 'src/app/models/ClipboardHelper';
+import { QuizLinkToken } from 'src/app/models/QuizLinkToken';
 import { CommonModule } from '@angular/common';  
 import { BrowserModule } from '@angular/platform-browser';
 
@@ -274,7 +275,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.countdown <= 0) {
         this.clearCountdown();
         this.modalService.dismissAll();
-        this.router.navigate(['/startQuiz', this.quizId, this.username]);
+        this.router.navigate(['/play', QuizLinkToken.encode(this.quizId, this.username)]);
       }
     }, 1000);
   }

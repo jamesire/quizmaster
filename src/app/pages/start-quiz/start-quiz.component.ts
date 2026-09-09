@@ -5,6 +5,7 @@ import { PartyMemberService } from 'src/app/party-member/party-member.service';
 import { Question } from 'src/app/models/Question';
 import { QuestionHelper } from 'src/app/models/QuestionHelper';
 import { ClipboardHelper } from 'src/app/models/ClipboardHelper';
+import { QuizLinkToken } from 'src/app/models/QuizLinkToken';
 
 @Component({
   selector: 'app-start-quiz',
@@ -48,8 +49,19 @@ export class StartQuizComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute, private router: Router, private partyMemberService: PartyMemberService) { }
 
   ngOnInit() {
-    this.quizId = this.route.snapshot.paramMap.get('quizId');
-    this.username = this.route.snapshot.paramMap.get('username');
+    const token = this.route.snapshot.paramMap.get('token');
+    const decoded = token ? QuizLinkToken.decode(token) : null;
+
+    if (!decoded) {
+      // A malformed/hand-edited link, not a transient failure - nothing a
+      // retry would fix.
+      this.loadError = 'This quiz link looks invalid.';
+      this.loadErrorRetryable = false;
+      return;
+    }
+
+    this.quizId = decoded.quizId;
+    this.username = decoded.username;
 
     // The server generates one shared question set per quiz (on "start")
     // and hands it out on request - this is what keeps every player (and
