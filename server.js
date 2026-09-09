@@ -176,7 +176,13 @@ io.on('connection', socket => {
           // when any individual player's page happens to load. Lets a
           // player who navigates away (or refreshes) mid-quiz and comes
           // back see the real remaining time instead of a fresh 30s.
-          quiz.startedAt = Date.now();
+          //
+          // Offset 3s into the future to match the 3-2-1 countdown every
+          // client runs (see beginCountdown() in dashboard.component.ts)
+          // before it navigates to the quiz page - without this, that
+          // countdown itself ate into the 30s clock, so players actually
+          // saw it start at 27.
+          quiz.startedAt = Date.now() + 3000;
         }
         io.sockets.in(socket.quizId).emit('send', { action: 'start', quizId: socket.quizId, questions: quiz.questions });
       } catch (err) {
