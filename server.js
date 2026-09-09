@@ -589,6 +589,29 @@ app.get('/*', function (req, res) {
   res.sendFile(path.join(__dirname + '/dist/index.html'));
 });
 
+// Periodic resource snapshot - lands in the same log stream as everything
+// else (WP Engine's log viewer, or any other host's), so actual memory/
+// connection trends can be read straight off the existing logs during
+// normal use, a deploy, or a stress test, without needing a separate
+// dashboard or metrics endpoint. 15s is short enough to catch a burst
+// that resolves in under a minute (the local stress test's whole burst
+// took ~18s), without being noisy at rest.
+const RESOURCE_LOG_INTERVAL_MS = 15000;
+
+setInterval(() => {
+  const mem = process.memoryUsage();
+  const toMB = bytes => Math.round(bytes / 1024 / 1024);
+
+  console.log(
+    'Resource snapshot - ' +
+    'RSS: ' + toMB(mem.rss) + 'MB, ' +
+    'heapUsed: ' + toMB(mem.heapUsed) + 'MB, ' +
+    'heapTotal: ' + toMB(mem.heapTotal) + 'MB | ' +
+    'active quizzes: ' + quizzes.size + ', ' +
+    'active connections: ' + io.engine.clientsCount
+  );
+}, RESOURCE_LOG_INTERVAL_MS);
+
 // Start the app by listening on the default Heroku port
 server.listen(process.env.PORT || 8080, () => {
   console.log('quizmaster listening on port ' + (process.env.PORT || 8080));
