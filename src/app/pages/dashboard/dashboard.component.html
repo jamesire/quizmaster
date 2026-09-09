@@ -94,7 +94,7 @@
               <span class="input-group-text"><i class="ni ni-key-25"></i></span>
             </div>
             <input #quizId type="text" class="form-control" placeholder="Quiz ID" aria-label="Quiz ID"
-              (keyup.enter)="joinQuiz(quizId.value, username.value)">
+              [value]="prefillQuizId" (keyup.enter)="joinQuiz(quizId.value, username.value)">
           </div>
         </div>
         <div class="form-group mb-0">

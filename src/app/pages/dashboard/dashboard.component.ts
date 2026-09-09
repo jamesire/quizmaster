@@ -1,5 +1,5 @@
-import { Router } from '@angular/router';
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
 import { ModalComponent } from 'src/app/modal/modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Answer } from 'src/app/models/Answer';
@@ -27,7 +27,7 @@ interface SelectedDifficulty {
   styleUrls: ['./dashboard.component.scss']
 })
 
-export class DashboardComponent implements OnInit, OnDestroy {
+export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   public showJoinQuizModal: boolean = false;
   public showHostQuizModal: boolean = false;
@@ -48,6 +48,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public joinNameError: boolean = false;
   public hostNameError: boolean = false;
   public quizIdCopied: boolean = false;
+  public prefillQuizId: string = '';
   public readonly difficulties: string[] = [
     "Any",
     "Easy",
@@ -56,6 +57,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ];
   public readonly makeOpaque: string = "change-opacity-on-answer";
   @ViewChild('showPartyModal') showPartyModalContent: any;
+  @ViewChild('joinQuizModal') joinQuizModalContent: any;
   private closeResult = '';  
   private subscription: Subscription;
   public username: string;
@@ -66,7 +68,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly maxAutoRetries: number = 3;
 
   
-  constructor(private modalService: NgbModal, private quizMasterApiClient: QuizmasterApiService, private triviaPreviewService: TriviaPreviewService, private router: Router, private partyMemberService: PartyMemberService)
+  constructor(private modalService: NgbModal, private quizMasterApiClient: QuizmasterApiService, private triviaPreviewService: TriviaPreviewService, private router: Router, private route: ActivatedRoute, private partyMemberService: PartyMemberService)
   {
     var defaultIndex = 0;
     var defaultDifficulty = this.difficulties[defaultIndex];
@@ -142,6 +144,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     })
     await this.loadCurrentQuestion();
+  }
+
+  ngAfterViewInit() {
+    // A shared invite link (?qid=ABCDEF, see copyQuizId below) lands
+    // here - jump straight to the Join modal with the ID already filled
+    // in so the visitor only has to pick a name, rather than making them
+    // find and retype a code they were just handed.
+    const qid = this.route.snapshot.queryParamMap.get('qid');
+    if (qid) {
+      this.prefillQuizId = qid.trim().toUpperCase();
+      this.openModal(this.joinQuizModalContent);
+    }
   }
 
   ngOnDestroy() {
@@ -308,8 +322,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.partyMemberService.hostQuiz(username, this.selectedDifficulty.index);
   }
 
+  // Copies a full invite message rather than just the bare ID - the code
+  // alone means a friend has to go find the site and the Join modal
+  // themselves, so this also hands them a direct link (?qid=...) that
+  // the Join modal picks up above to skip straight to entering a name.
   async copyQuizId(tooltip?: any) {
-    if (!(await ClipboardHelper.copy(this.quizId))) {
+    const link = `${window.location.origin}/?qid=${this.quizId}`;
+    const message = `${this.username} has invited you to Quizmastr! 🧠\n\n` +
+      `Join with code: ${this.quizId}\n` +
+      `Or use this link: ${link}`;
+
+    if (!(await ClipboardHelper.copy(message))) {
       return;
     }
     this.quizIdCopied = true;
