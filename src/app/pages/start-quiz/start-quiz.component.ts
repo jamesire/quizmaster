@@ -35,12 +35,14 @@ export class StartQuizComponent implements OnInit, OnDestroy {
   public loadErrorRetryable: boolean = false;
   public answerHistory: boolean[] = [];
   public resultsCopied: boolean = false;
+  public scoreStarFlip: boolean = false;
   private quizId: string;
   private timerHandle: any;
   private subscription: Subscription;
   private retryHandle: any;
   private retryAttempts: number = 0;
   private readonly maxAutoRetries: number = 3;
+  private scoreStarFlipHandle: any;
 
   constructor(private route: ActivatedRoute, private router: Router, private partyMemberService: PartyMemberService) { }
 
@@ -96,6 +98,10 @@ export class StartQuizComponent implements OnInit, OnDestroy {
       clearTimeout(this.retryHandle);
       this.retryHandle = null;
     }
+    if (this.scoreStarFlipHandle) {
+      clearTimeout(this.scoreStarFlipHandle);
+      this.scoreStarFlipHandle = null;
+    }
   }
 
   retryLoad() {
@@ -120,6 +126,7 @@ export class StartQuizComponent implements OnInit, OnDestroy {
 
     if (isCorrect) {
       this.score++;
+      this.triggerScoreStarFlip();
     }
 
     setTimeout(() => {
@@ -137,6 +144,22 @@ export class StartQuizComponent implements OnInit, OnDestroy {
         this.questionIndex++;
       }
     }, 2500);
+  }
+
+  // Re-triggers the score badge's star-flip CSS animation on every
+  // correct answer, including back-to-back ones. Just setting the flag
+  // true again wouldn't restart the animation if it's already true, so
+  // it's cleared first and re-set on the next tick, giving Angular a
+  // chance to actually remove the class before it's added back.
+  private triggerScoreStarFlip() {
+    if (this.scoreStarFlipHandle) {
+      clearTimeout(this.scoreStarFlipHandle);
+    }
+    this.scoreStarFlip = false;
+    setTimeout(() => {
+      this.scoreStarFlip = true;
+      this.scoreStarFlipHandle = setTimeout(() => this.scoreStarFlip = false, 500);
+    });
   }
 
   // Bases the countdown on the quiz's actual start time (from the

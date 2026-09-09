@@ -50,8 +50,6 @@
 
 .timer-badge {
     transition: background-color .4s;
-    font-size: 1.15rem;
-    min-width: 3.25rem;
 
     // Taken out of the row's normal flex flow and centered on the row
     // itself, rather than centered between whatever the Question and
@@ -77,6 +75,21 @@
 .leaderboard-list .list-group-item {
     border-left: 0;
     border-right: 0;
+}
+
+// Coin-flip for the score badge's star every time a point is scored.
+@keyframes score-star-flip {
+    0% {
+        transform: rotateY(0deg);
+    }
+    100% {
+        transform: rotateY(360deg);
+    }
+}
+
+.score-star-flip {
+    display: inline-block;
+    animation: score-star-flip .5s ease-out;
 }
 
 .rank-badge {

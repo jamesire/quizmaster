@@ -31,7 +31,7 @@
                     <i class="fas fa-clock mr-1"></i>{{secondsRemaining}}
                   </span>
                   <span class="badge badge-pill badge-light font-weight-bold px-3 py-2">
-                    <i class="fas fa-star text-warning mr-1"></i>{{score}}
+                    <i class="fas fa-star text-warning mr-1" [class.score-star-flip]="scoreStarFlip"></i>{{score}}
                   </span>
                 </div>
                 <div class="row">
