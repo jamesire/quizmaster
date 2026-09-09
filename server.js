@@ -54,6 +54,36 @@ async function fetchQuizQuestions(amount) {
   }));
 }
 
+// A refresh disconnects the old socket (dropping it to 0 users, if it was
+// the only one) an instant before the new socket reconnects and claims the
+// quiz again. Deleting the quiz the moment it hits 0 users would race that
+// reconnect and delete it out from under a solo player who just refreshed -
+// so give it a few seconds to see if anyone comes back before actually
+// tearing it down.
+const QUIZ_CLEANUP_GRACE_MS = 5000;
+
+function cancelQuizCleanup(quiz) {
+  if (quiz.cleanupHandle) {
+    clearTimeout(quiz.cleanupHandle);
+    quiz.cleanupHandle = null;
+  }
+}
+
+function scheduleQuizCleanup(quizId) {
+  const quiz = quizzes.get(quizId);
+  if (!quiz) {
+    return;
+  }
+
+  cancelQuizCleanup(quiz);
+  quiz.cleanupHandle = setTimeout(() => {
+    const current = quizzes.get(quizId);
+    if (current && current.users.length === 0) {
+      quizzes.delete(quizId);
+    }
+  }, QUIZ_CLEANUP_GRACE_MS);
+}
+
 function removeUserFromQuiz(quizId, username) {
   const quiz = quizzes.get(quizId);
   if (!quiz) {
@@ -63,8 +93,7 @@ function removeUserFromQuiz(quizId, username) {
   quiz.users = quiz.users.filter(u => u !== username);
 
   if (quiz.users.length === 0) {
-    quizzes.delete(quizId);
-    return null;
+    scheduleQuizCleanup(quizId);
   }
 
   return quiz;
@@ -125,6 +154,7 @@ io.on('connection', socket => {
       }
 
       quiz.users.push(data.username);
+      cancelQuizCleanup(quiz);
 
       socket.username = data.username;
       socket.quizId = data.quizId;
@@ -214,6 +244,28 @@ io.on('connection', socket => {
       // refreshed player still shows up on the party/score list and still
       // gets live score updates from everyone else.
       if (data.username) {
+        // If this player already has another live tab/window on this same
+        // quiz (a genuine second tab, not just a refresh - a refresh's old
+        // socket is usually already gone by now), kick it. Otherwise both
+        // tabs run their own independent 30s answer clock off the same
+        // question set - effectively a second attempt at every question -
+        // and both call submitScore at the end, with whichever happens to
+        // land last silently overwriting the other's real score. Only the
+        // newest tab should ever be "live" for a given player.
+        const room = io.sockets.adapter.rooms.get(data.quizId);
+        if (room) {
+          for (const socketId of room) {
+            if (socketId === socket.id) {
+              continue;
+            }
+            const other = io.sockets.sockets.get(socketId);
+            if (other && other.username === data.username) {
+              other.emit('send', { action: 'kicked', quizId: data.quizId, message: 'This quiz was opened in another tab or window.' });
+              other.disconnect(true);
+            }
+          }
+        }
+
         socket.username = data.username;
         socket.quizId = data.quizId;
         socket.join(data.quizId);
@@ -221,6 +273,11 @@ io.on('connection', socket => {
         if (!quiz.users.includes(data.username)) {
           quiz.users.push(data.username);
         }
+        // Someone just proved they're still here - whether they were
+        // already in quiz.users or just got re-added above, cancel any
+        // pending cleanup from a prior disconnect (e.g. the refresh that
+        // likely preceded this very request).
+        cancelQuizCleanup(quiz);
       }
 
       socket.emit('send', { action: 'questions', quizId: data.quizId, questions: quiz.questions, partyList: quiz.users, scores: quiz.scores, startedAt: quiz.startedAt });

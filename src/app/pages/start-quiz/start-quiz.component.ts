@@ -36,6 +36,7 @@ export class StartQuizComponent implements OnInit, OnDestroy {
   public answerHistory: boolean[] = [];
   public resultsCopied: boolean = false;
   public scoreStarFlip: boolean = false;
+  public kicked: boolean = false;
   private quizId: string;
   private timerHandle: any;
   private subscription: Subscription;
@@ -71,6 +72,14 @@ export class StartQuizComponent implements OnInit, OnDestroy {
       }
       else if (msg.action === 'scores' && msg.quizId === this.quizId) {
         this.scores = msg.scores;
+      }
+      else if (msg.action === 'kicked' && msg.quizId === this.quizId) {
+        // The server saw this same player open another tab/window on this
+        // quiz and is keeping that one live instead - stop this instance
+        // dead so it can't keep answering (or submit a stale score that'd
+        // overwrite the real one) in the background.
+        this.kicked = true;
+        this.clearTimer();
       }
       else if (msg.action === 'error') {
         console.error('Start quiz message: ' + msg.message);
@@ -110,7 +119,7 @@ export class StartQuizComponent implements OnInit, OnDestroy {
   }
 
   checkAnswer(i: number) {
-    if (this.answerIsSelected || this.isFinished) {
+    if (this.answerIsSelected || this.isFinished || this.kicked) {
       return;
     }
 

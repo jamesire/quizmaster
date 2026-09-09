@@ -6,7 +6,7 @@
         <div class="mx-auto">
           <div class="card card-stats quiz-card shadow mb-4 mb-xl-0">
             <div class="card-body">
-              <div *ngIf="!isLoaded && !isFinished && !loadError" class="row">
+              <div *ngIf="!isLoaded && !isFinished && !loadError && !kicked" class="row">
                 <div class="col text-center py-5">
                   <div class="spinner-border text-primary" role="status">
                     <span class="sr-only">Loading...</span>
@@ -14,14 +14,21 @@
                   <p class="text-muted mt-3 mb-0">Loading questions…</p>
                 </div>
               </div>
-              <div *ngIf="loadError" class="row">
+              <div *ngIf="loadError && !kicked" class="row">
                 <div class="col text-center py-5">
                   <p class="text-danger mb-3">{{loadError}}</p>
                   <button *ngIf="loadErrorRetryable" type="button" class="btn btn-primary" (click)="retryLoad()">Retry now</button>
                   <button *ngIf="!loadErrorRetryable" type="button" class="btn btn-primary" (click)="backToDashboard()">Dashboard</button>
                 </div>
               </div>
-              <ng-container *ngIf="isLoaded && !isFinished">
+              <div *ngIf="kicked" class="row">
+                <div class="col text-center py-5">
+                  <i class="fas fa-exclamation-circle text-warning fa-2x mb-3"></i>
+                  <p class="text-muted mb-3">This quiz was opened in another tab or window, so this one has been disconnected.</p>
+                  <button type="button" class="btn btn-primary" (click)="backToDashboard()">Dashboard</button>
+                </div>
+              </div>
+              <ng-container *ngIf="isLoaded && !isFinished && !kicked">
                 <div class="d-flex align-items-center justify-content-between mb-3 quiz-header-row">
                   <span class="badge badge-pill badge-light text-primary font-weight-bold px-3 py-2">
                     Question {{questionIndex + 1}}
@@ -59,7 +66,7 @@
                       </div> -->
                 </div>
               </ng-container>
-              <div *ngIf="isFinished" class="row">
+              <div *ngIf="isFinished && !kicked" class="row">
                 <div class="col text-center">
                   <h5 class="card-title text-uppercase text-muted mb-1">Time's up!</h5>
                   <p class="text-muted mb-4">Here's how everyone did</p>
