@@ -383,11 +383,7 @@ export class StartQuizComponent implements OnInit, OnDestroy {
   // followed by the party's scoreboard - meant to be pasted into a chat
   // to brag/compare, same spirit as those games' own share buttons.
   async copyResults(tooltip?: any) {
-    const squares = this.answerHistory.map(correct => correct ? '🟩' : '🟥');
-    const rows: string[] = [];
-    for (let i = 0; i < squares.length; i += 5) {
-      rows.push(squares.slice(i, i + 5).join(''));
-    }
+    const squares = this.answerHistory.map(correct => correct ? '🟩' : '🟥').join('');
 
     const leaderboard = this.getSortedParty().map(person => {
       const score = this.scores[person] !== undefined ? this.scores[person] : '-';
@@ -397,7 +393,7 @@ export class StartQuizComponent implements OnInit, OnDestroy {
     const lines = [
       '🧠 Quizmastr · Quiz ' + this.quizId,
       '',
-      ...(rows.length ? [rows.join('\n'), ''] : []),
+      ...(squares.length ? [squares, ''] : []),
       ...leaderboard,
       '',
       'Play at ' + window.location.origin
