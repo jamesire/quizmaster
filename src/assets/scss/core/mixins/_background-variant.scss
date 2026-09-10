@@ -1,5 +1,10 @@
 // Contextual backgrounds
-@mixin bg-variant($parent, $color) {
+// $ignore-warning is unused - Bootstrap 4.6's own bg-variant/
+// bg-gradient-variant mixins gained this third param (silences a
+// deprecation notice in Bootstrap's own body, which these overrides
+// replace entirely), and Bootstrap's _background.scss now always
+// passes it.
+@mixin bg-variant($parent, $color, $ignore-warning: false) {
     #{$parent} {
         background-color: $color !important;
     }
@@ -11,7 +16,7 @@
     }
 }
 
-@mixin bg-gradient-variant($parent, $color) {
+@mixin bg-gradient-variant($parent, $color, $ignore-warning: false) {
     #{$parent} {
         background: linear-gradient(87deg, $color 0, adjust-hue($color, 25%) 100%) !important;
     }

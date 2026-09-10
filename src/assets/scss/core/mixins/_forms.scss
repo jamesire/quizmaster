@@ -1,4 +1,9 @@
-@mixin form-control-focus() {
+// $ignore-warning is unused here - it only silences a deprecation
+// notice in Bootstrap's own default mixin (introduced in 4.3+, and
+// which this override replaces entirely anyway) - but Bootstrap 4.6's
+// _forms.scss calls form-control-focus($ignore-warning: true), so this
+// override needs to at least accept the argument or the build fails.
+@mixin form-control-focus($ignore-warning: false) {
   &:focus {
     color: $input-focus-color;
     background-color: $input-focus-bg;
@@ -14,7 +19,12 @@
 }
 
 
-@mixin form-validation-state($state, $color) {
+// $icon is unused, same reasoning as $ignore-warning above - Bootstrap
+// 4.6's own mixin gained a third parameter (a background icon on
+// .form-control) that this override doesn't implement or need, but
+// still has to accept since Bootstrap's own _forms.scss now always
+// passes it.
+@mixin form-validation-state($state, $color, $icon: null) {
   .#{$state}-feedback {
     display: none;
     width: 100%;
