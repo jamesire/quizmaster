@@ -7,7 +7,6 @@ import { Injectable } from '@angular/core';
 // without also moving off Angular 9's TypeScript ceiling.
 import { io } from 'socket.io-client';
 import { Subject } from 'rxjs';
-import * as Rx from 'rxjs/Rx';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -31,7 +30,7 @@ export class WebsocketService {
   // subscriptions.)
   private incoming = new Subject<any>();
 
-  connect(): Rx.Subject<MessageEvent> {
+  connect(): Subject<MessageEvent> {
     if (!this.socket) {
       // Production hosting (WP Engine's Headless Platform) doesn't
       // support WebSockets behind its edge - confirmed directly by WP
@@ -57,7 +56,7 @@ export class WebsocketService {
       }
     }
 
-    return Rx.Subject.create(observer, this.incoming);
+    return Subject.create(observer, this.incoming);
   }
 
   disconnect() {

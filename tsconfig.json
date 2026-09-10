@@ -5,7 +5,11 @@
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
-    "module": "es2015",
+    // esnext (not es2015) - dynamic import() expressions, used by the
+    // lazy-loaded routes in app.routing.ts, aren't valid TS syntax under
+    // plain es2015 module output. This is what a stock Angular CLI
+    // project generates by default; this tsconfig had drifted from it.
+    "module": "esnext",
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
