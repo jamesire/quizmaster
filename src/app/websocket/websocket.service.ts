@@ -1,10 +1,4 @@
 import { Injectable } from '@angular/core';
-// socket.io-client is pinned to exactly 4.5.4 in package.json (not a
-// range) - 4.6.0+ pulls in an engine.io-client whose .d.ts files use
-// `import type` syntax, which needs TypeScript >=3.8. Angular 9's
-// compiler-cli hard-requires TypeScript <3.8, so anything newer fails
-// to build. Don't let `npm audit fix`/Dependabot bump this past 4.5.4
-// without also moving off Angular 9's TypeScript ceiling.
 import { io } from 'socket.io-client';
 import { Subject } from 'rxjs';
 import { environment } from '../../environments/environment';

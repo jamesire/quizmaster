@@ -2,30 +2,38 @@
 // Components
 //
 
-@import "custom/alert";
-@import "custom/avatar";
-@import "custom/badge";
-@import "custom/buttons";
-@import "custom/card";
-@import "custom/chart";
-@import "custom/close";
-@import "custom/content";
-@import "custom/custom-forms";
-@import "custom/dropdown";
-@import "custom/footer";
-@import "custom/forms";
-@import "custom/header";
-@import "custom/icons";
-@import "custom/input-group";
-@import "custom/list-group";
-@import "custom/map";
-@import "custom/mask";
-@import "custom/modal";
-@import "custom/nav";
-@import "custom/navbar";
-@import "custom/pagination";
-@import "custom/popover";
-@import "custom/progress";
-@import "custom/separator";
-@import "custom/tables";
-@import "custom/type";
+// This file already lives in custom/ - these were importing
+// "custom/<name>" (i.e. custom/custom/<name>), a redundant prefix that
+// only ever resolved by accident under the old node-sass/sass-loader's
+// looser @import search path, which searched every ancestor import's
+// directory in the chain (argon.scss's own src/assets/scss/, where
+// custom/_alert.scss etc. do exist). Dart Sass (post Angular-10 build
+// toolchain bump) resolves strictly relative to the importing file, so
+// these need to be plain sibling references.
+@import "alert";
+@import "avatar";
+@import "badge";
+@import "buttons";
+@import "card";
+@import "chart";
+@import "close";
+@import "content";
+@import "custom-forms";
+@import "dropdown";
+@import "footer";
+@import "forms";
+@import "header";
+@import "icons";
+@import "input-group";
+@import "list-group";
+@import "map";
+@import "mask";
+@import "modal";
+@import "nav";
+@import "navbar";
+@import "pagination";
+@import "popover";
+@import "progress";
+@import "separator";
+@import "tables";
+@import "type";
