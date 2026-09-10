@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs/Rx';
+import { Subject } from 'rxjs';
 import { WebsocketService } from '../websocket/websocket.service';
 
 @Injectable({
@@ -9,12 +9,16 @@ export class PartyMemberService {
 
   public partyMembers: Subject<any>;
 
-  constructor(private wsService: WebsocketService) { 
-    this.partyMembers = <Subject<any>>this.wsService
-    .connect()
-    .map((response: any): any => {
-      return response;
-    })
+  constructor(private wsService: WebsocketService) {
+    // connect() already returns a real Subject - the old
+    // .map((response) => response) here was an identity no-op that only
+    // existed (via rxjs-compat's prototype-patched .map) to round-trip
+    // through an AnonymousSubject and satisfy the `<Subject<any>>` cast
+    // below it. Plain rxjs 6 doesn't patch Observable.prototype with
+    // .map at all, so that cast would otherwise have been lying about
+    // a type that no longer has a .next() method - connect()'s result
+    // is used as-is instead.
+    this.partyMembers = this.wsService.connect();
   }
 
   hostQuiz(username, difficulty) {
