@@ -48,7 +48,7 @@ const routes: Routes =[
     // mid-page on the next screen. Back/forward browser navigation still
     // restores the scroll position it had, which is Angular's default
     // pairing for this option.
-    RouterModule.forRoot(routes, { scrollPositionRestoration: 'top' })
+    RouterModule.forRoot(routes, { scrollPositionRestoration: 'top', relativeLinkResolution: 'legacy' })
   ],
   exports: [
   ],
