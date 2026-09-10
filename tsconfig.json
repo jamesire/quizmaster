@@ -12,7 +12,6 @@
     // moved it to es2020, its own preferred default - left as-is.
     "module": "es2020",
     "moduleResolution": "node",
-    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "es5",
     "typeRoots": [
