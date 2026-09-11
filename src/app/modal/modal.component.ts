@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import {Component, ViewChild, OnInit, NgModule} from '@angular/core';
 
 import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
