@@ -79,6 +79,19 @@
         </div>
       </div>
     </div>
+
+    <div class="col mx-auto" [routerLink]="['/solo']">
+      <div class="card cta-card shadow clickable">
+        <div class="card-body text-center py-5">
+          <div class="cta-icon-badge cta-icon-primary mx-auto mb-3">
+            <i class="fas fa-user"></i>
+          </div>
+          <h4 class="font-weight-bold mb-2">Single Player</h4>
+          <p class="text-muted mb-4">Answer as many questions as you can, solo.</p>
+          <span class="btn btn-outline-primary btn-sm rounded-pill px-4 mb-0">Play Solo</span>
+        </div>
+      </div>
+    </div>
   </div>
   <!-- Todo: Componentise this -->
   <ng-template #joinQuizModal let-modal>

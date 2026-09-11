@@ -630,6 +630,32 @@ io.on('connection', socket => {
   });
 });
 
+// Single player mode never opens a socket at all - it's just a plain
+// HTTP fetch for a question set, answered and scored entirely
+// client-side with nothing to keep in sync with anyone else.
+//
+// Deliberately reuses getQuestionsForQuiz() unchanged, drawing from the
+// exact same shared pool multiplayer quizzes read from - a second
+// OpenTDB-fetching path here would just double up against the same
+// rate limit for no reason. The only new behavior is reversing the
+// batch before sending it: multiplayer always reads a pool batch
+// forward (index 0 upward), so a player who opens single player in a
+// second tab while also mid-multiplayer-quiz reads the same 50
+// questions from the opposite end. A 30s round realistically gets
+// through ~10-20 questions either way (see the same observation in
+// start-quiz.component.ts), so forward-from-1 and backward-from-50
+// can't meet within one round - even in the unlucky case both modes
+// land on the identical pool batch, there's nothing to spoil.
+app.get('/api/single-player-questions', async (req, res) => {
+  try {
+    const questions = await getQuestionsForQuiz();
+    res.json(questions.slice().reverse());
+  } catch (err) {
+    console.error('Single player question fetch failed: ' + err);
+    res.status(503).json({ message: 'Could not load quiz questions. Please try again.' });
+  }
+});
+
 // Serve the built Angular app.
 //
 // Every build gives its JS/CSS bundles a content hash in the filename

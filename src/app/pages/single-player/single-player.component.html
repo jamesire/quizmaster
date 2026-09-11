@@ -1,0 +1,89 @@
+<div class="pb-8 pt-md-6">
+  <div class="container-fluid">
+    <div class="header-body">
+      <div class="row">
+        <div class="mx-auto">
+          <div class="card card-stats quiz-card shadow mb-4 mb-xl-0">
+            <div class="card-body">
+              @if (!isLoaded && !isFinished && !loadError) {
+                <div class="row">
+                  <div class="col text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="sr-only">Loading...</span>
+                    </div>
+                    <p class="text-muted mt-3 mb-0">Loading questions…</p>
+                  </div>
+                </div>
+              }
+              @if (loadError) {
+                <div class="row">
+                  <div class="col text-center py-5">
+                    <p class="text-danger mb-3">{{loadError}}</p>
+                    @if (loadErrorRetryable) {
+                      <button type="button" class="btn btn-primary" (click)="retryLoad()">Retry now</button>
+                    }
+                    @if (!loadErrorRetryable) {
+                      <button type="button" class="btn btn-primary" (click)="backToDashboard()">Dashboard</button>
+                    }
+                  </div>
+                </div>
+              }
+              @if (isLoaded && !isFinished) {
+                <div class="d-flex align-items-center justify-content-between mb-3 quiz-header-row">
+                  <span class="badge badge-pill badge-light text-primary font-weight-bold px-3 py-2">
+                    Question {{questionIndex + 1}}
+                  </span>
+                  <span class="badge badge-pill px-3 py-2 font-weight-bold text-white timer-badge"
+                    [ngClass]="secondsRemaining <= 10 ? 'bg-danger' : 'bg-warning'">
+                    <i class="fas fa-clock mr-1"></i>{{secondsRemaining}}
+                  </span>
+                  <span class="badge badge-pill badge-light font-weight-bold px-3 py-2">
+                    <i class="fas fa-star text-warning mr-1" [class.score-star-flip]="scoreStarFlip"></i>{{score}}
+                  </span>
+                </div>
+                <div class="row">
+                  <div class="col">
+                    <span class="h2 font-weight-bold mb-0"
+                    [ngClass]="answerIsSelected && [makeOpaque]">{{quizQuestions[questionIndex].question}}</span>
+                  </div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col">
+                    @for (answer of quizQuestions[questionIndex].allAnswers; track answer; let i = $index) {
+                      <div
+                        class="btn-group btn-group-toggle w-50"
+                        [ngClass]="answerIsSelected && [makeOpaque]">
+                        <label class="btn-primary btn-block answer-btn m-1" [ngClass]="answerIsSelected && [css[i]]"
+                          (click)="checkAnswer(i)">
+                          {{answer.text}}
+                        </label>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+              @if (isFinished) {
+                <div class="row">
+                  <div class="col text-center py-4">
+                    <h5 class="card-title text-uppercase text-muted mb-1">Time's up!</h5>
+                    <p class="text-muted mb-4">You scored</p>
+                    <span class="h1 font-weight-bold text-primary d-block mb-4">{{score}}</span>
+                    <button type="button" class="btn btn-outline-primary mr-2" (click)="copyResults(resultsTooltip)"
+                      #resultsTooltip="ngbTooltip" placement="top" triggers="hover focus click" container="body"
+                      ngbTooltip="{{ resultsCopied ? 'Copied!' : 'Copy results' }}">
+                      <i class="fas fa-copy mr-1"></i>Copy results
+                    </button>
+                    <button type="button" class="btn btn-success mr-2" (click)="playAgain()">
+                      <i class="fas fa-redo mr-1"></i>Play Again
+                    </button>
+                    <button type="button" class="btn btn-primary" (click)="backToDashboard()">Dashboard</button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

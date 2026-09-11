@@ -22,6 +22,7 @@ import { JoinQuizService } from './pages/join-quiz/join-quiz.service';
 import { WebsocketService } from './websocket/websocket.service';
 import { PartyMemberService } from './party-member/party-member.service';
 import { StartQuizComponent } from './pages/start-quiz/start-quiz.component';
+import { SinglePlayerComponent } from './pages/single-player/single-player.component';
 
 
 @NgModule({
@@ -33,7 +34,8 @@ import { StartQuizComponent } from './pages/start-quiz/start-quiz.component';
     HostWaitingRoomComponent,
     QuizComponent,
     HomeComponent,
-    StartQuizComponent
+    StartQuizComponent,
+    SinglePlayerComponent
   ],
   imports: [
     BrowserAnimationsModule,
