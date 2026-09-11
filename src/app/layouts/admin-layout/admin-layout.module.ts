@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';import { RouterModule } from '@angular/router';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
@@ -15,23 +15,17 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from 'src/app/modal/modal.component';
 // import { ToastrModule } from 'ngx-toastr';
 
-@NgModule({
-  imports: [
-    CommonModule,
-    RouterModule.forChild(AdminLayoutRoutes),
-    FormsModule,
-    HttpClientModule,
-    NgbModule,
-    ClipboardModule
-  ],
-  declarations: [
-    UserProfileComponent,
-    TablesComponent,
-    IconsComponent,
-    MapsComponent,
-    ModalComponent,
-    DashboardComponent
-  ]
-})
+@NgModule({ declarations: [
+        UserProfileComponent,
+        TablesComponent,
+        IconsComponent,
+        MapsComponent,
+        ModalComponent,
+        DashboardComponent
+    ], imports: [CommonModule,
+        RouterModule.forChild(AdminLayoutRoutes),
+        FormsModule,
+        NgbModule,
+        ClipboardModule], providers: [provideHttpClient(withXhr(), withInterceptorsFromDi())] })
 
 export class AdminLayoutModule {}

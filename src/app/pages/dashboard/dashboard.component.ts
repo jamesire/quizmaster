@@ -1,20 +1,16 @@
 import { Router, ActivatedRoute } from '@angular/router';
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ModalComponent } from 'src/app/modal/modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Answer } from 'src/app/models/Answer';
 import { Question } from 'src/app/models/Question';
 import { QuizmasterApiService } from 'src/app/quizmaster-api-client/quizmaster-api-service.service';
 import { TriviaPreviewService } from 'src/app/quizmaster-api-client/trivia-preview.service';
-import { isSyntheticPropertyOrListener } from '@angular/compiler/src/render3/util';
-import { ɵHttpInterceptingHandler } from '@angular/common/http';
 import { interval, Subscription, Subject } from 'rxjs';
 import { PartyMemberService } from 'src/app/party-member/party-member.service';
 import { QuestionHelper } from 'src/app/models/QuestionHelper';
 import { ClipboardHelper } from 'src/app/models/ClipboardHelper';
 import { QuizLinkToken } from 'src/app/models/QuizLinkToken';
-import { CommonModule } from '@angular/common';  
-import { BrowserModule } from '@angular/platform-browser';
 
 interface SelectedDifficulty {
   value: string,
@@ -23,9 +19,11 @@ interface SelectedDifficulty {
 
 
 @Component({
-  selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+    selector: 'app-dashboard',
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {

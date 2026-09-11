@@ -1,7 +1,7 @@
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
@@ -25,17 +25,6 @@ import { StartQuizComponent } from './pages/start-quiz/start-quiz.component';
 
 
 @NgModule({
-  imports: [
-    BrowserAnimationsModule,
-    FormsModule,
-    HttpClientModule,
-    ComponentsModule,
-    NgbModule,
-    RouterModule,
-    AppRoutingModule,
-    BrowserModule,
-    HttpClientModule
-  ],
   declarations: [
     AppComponent,
     AdminLayoutComponent,
@@ -46,11 +35,21 @@ import { StartQuizComponent } from './pages/start-quiz/start-quiz.component';
     HomeComponent,
     StartQuizComponent
   ],
+  imports: [
+    BrowserAnimationsModule,
+    FormsModule,
+    ComponentsModule,
+    NgbModule,
+    RouterModule,
+    AppRoutingModule,
+    BrowserModule
+  ],
   providers: [
     QuizmasterApiService,
     JoinQuizService,
     WebsocketService,
-    PartyMemberService
+    PartyMemberService,
+    provideHttpClient(withXhr(), withInterceptorsFromDi())
   ],
   bootstrap: [AppComponent]
 })
