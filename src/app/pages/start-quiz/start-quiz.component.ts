@@ -8,9 +8,10 @@ import { ClipboardHelper } from 'src/app/models/ClipboardHelper';
 import { QuizLinkToken } from 'src/app/models/QuizLinkToken';
 
 @Component({
-  selector: 'app-start-quiz',
-  templateUrl: './start-quiz.component.html',
-  styleUrls: ['./start-quiz.component.scss']
+    selector: 'app-start-quiz',
+    templateUrl: './start-quiz.component.html',
+    styleUrls: ['./start-quiz.component.scss'],
+    standalone: false
 })
 
 export class StartQuizComponent implements OnInit, OnDestroy {

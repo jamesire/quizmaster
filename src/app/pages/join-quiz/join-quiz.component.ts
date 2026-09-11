@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { JoinQuizService } from './join-quiz.service';
 
 @Component({
-  selector: 'app-join-quiz',
-  templateUrl: './join-quiz.component.html',
-  styleUrls: ['./join-quiz.component.css']
+    selector: 'app-join-quiz',
+    templateUrl: './join-quiz.component.html',
+    styleUrls: ['./join-quiz.component.css'],
+    standalone: false
 })
 export class JoinQuizComponent implements OnInit {
 
