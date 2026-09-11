@@ -1,11 +1,12 @@
 
-import {Component, ViewChild, OnInit, NgModule} from '@angular/core';
+import {Component, ViewChild, OnInit, NgModule, ChangeDetectionStrategy} from '@angular/core';
 
 import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'app-modal',
     templateUrl: './modal.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 

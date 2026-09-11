@@ -12,6 +12,21 @@
     "typeRoots": [
       "node_modules/@types"
     ],
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    // TS 6.0 deprecated `baseUrl` ahead of its removal in 7.0 - it's
+    // still needed here (several files import via absolute
+    // 'src/app/...' paths that resolve against it), so silence the
+    // warning rather than migrate off it as part of this hop.
+    "ignoreDeprecations": "6.0",
+    // This app has never had strict type-checking on (no "strict" key
+    // has ever existed in this file - see the untyped `var`s and
+    // loosely-typed class fields throughout). Something in the v22
+    // toolchain started enforcing noImplicitAny/strictNullChecks-family
+    // diagnostics by default despite that; pinning them off explicitly
+    // restores the behavior this app has always actually had, rather
+    // than a real type-safety improvement being deliberately made.
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictPropertyInitialization": false
   }
 }

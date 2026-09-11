@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PartyMemberService } from 'src/app/party-member/party-member.service';
@@ -11,6 +11,7 @@ import { QuizLinkToken } from 'src/app/models/QuizLinkToken';
     selector: 'app-start-quiz',
     templateUrl: './start-quiz.component.html',
     styleUrls: ['./start-quiz.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 

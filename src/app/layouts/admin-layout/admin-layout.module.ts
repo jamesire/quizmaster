@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';import { RouterModule } from '@angular/router';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
@@ -26,6 +26,6 @@ import { ModalComponent } from 'src/app/modal/modal.component';
         RouterModule.forChild(AdminLayoutRoutes),
         FormsModule,
         NgbModule,
-        ClipboardModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
+        ClipboardModule], providers: [provideHttpClient(withXhr(), withInterceptorsFromDi())] })
 
 export class AdminLayoutModule {}
