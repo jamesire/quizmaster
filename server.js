@@ -631,13 +631,46 @@ io.on('connection', socket => {
 });
 
 // Serve the built Angular app.
-app.use(express.static(__dirname + '/dist'));
+//
+// Every build gives its JS/CSS bundles a content hash in the filename
+// (main.<hash>.js, styles.<hash>.css, plus lazy chunks like
+// 57.<hash>.js) - a new deploy always produces new filenames, and the
+// old ones are simply gone once dist/ is replaced. index.html is the
+// one file that ties a specific set of those hashes together, so if a
+// browser ever caches an old index.html past a deploy, it goes on
+// requesting bundle files that no longer exist - they 404, Angular
+// never bootstraps, and the visitor gets a blank white page until they
+// hard-reload. Explicitly forcing index.html to always revalidate
+// closes that gap; the hashed bundles themselves are safe to cache
+// essentially forever, since any content change already means a new
+// filename.
+const HASHED_ASSET_PATTERN = /\.[0-9a-f]{8,}\.(js|css)$/i;
+
+app.use(express.static(__dirname + '/dist', {
+  setHeaders: (res, filePath) => {
+    if (path.basename(filePath) === 'index.html') {
+      res.setHeader('Cache-Control', 'no-store');
+    } else if (HASHED_ASSET_PATTERN.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    } else {
+      // favicon.ico, ads.txt, src/assets/* etc. - none of these have a
+      // content hash in their name, so a long/immutable cache would
+      // mean a real update to one of them could stay stale in
+      // visitors' browsers indefinitely. A moderate cache still saves
+      // most of the benefit without that risk.
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+    }
+  }
+}));
 
 app.get('/isAlive', (req, res) => {
   res.send('Alive!');
 });
 
 app.get('/*', function (req, res) {
+  // Same reasoning as the index.html case above - every client-side
+  // (Angular) route falls through to here.
+  res.set('Cache-Control', 'no-store');
   res.sendFile(path.join(__dirname + '/dist/index.html'));
 });
 
