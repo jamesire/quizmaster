@@ -5,21 +5,17 @@
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
-    // es2020 (not es2015) - dynamic import() expressions, used by the
-    // lazy-loaded routes in app.routing.ts, aren't valid TS syntax under
-    // plain es2015 module output. Bumped to esnext by hand first (the
-    // minimum that allows it); the Angular 10 update schematic then
-    // moved it to es2020, its own preferred default - left as-is.
     "module": "es2020",
     "moduleResolution": "node",
     "experimentalDecorators": true,
-    "target": "es2020",
+    "target": "ES2022",
     "typeRoots": [
       "node_modules/@types"
     ],
     "lib": [
       "es2017",
       "dom"
-    ]
+    ],
+    "useDefineForClassFields": false
   }
 }
