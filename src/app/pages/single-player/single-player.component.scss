@@ -1,4 +1,47 @@
-// Nothing single-player-specific yet - the question/timer/answer-button/
-// score-star styling is shared with the multiplayer quiz screen via the
-// second styleUrls entry (../start-quiz/start-quiz.component.scss),
-// since the markup here is deliberately the same look and feel.
+// The question/timer/answer-button/score-star styling is shared with
+// the multiplayer quiz screen via the second styleUrls entry
+// (../start-quiz/start-quiz.component.scss), since the markup here is
+// deliberately the same look and feel. The pre-game countdown below is
+// single-player-specific - there's no equivalent element in the
+// multiplayer screen, which shows its 3-2-1 on the dashboard instead.
+
+// Same gradient as the dashboard's Single Player card icon
+// (.cta-icon-primary) - ties the countdown visually back to the card
+// that led here, rather than introducing an unrelated color.
+.countdown-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(87deg, #5e72e4, #825ee4);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    font-weight: 700;
+    box-shadow: 0 .75rem 1.5rem rgba(94, 114, 228, .35);
+}
+
+// Pops each number in with a slight overshoot rather than just
+// appearing - re-triggered every second by toggling this class off then
+// back on (see triggerCountdownPulse() in the component), since simply
+// changing the number inside an already-present element doesn't restart
+// a CSS animation on its own.
+@keyframes countdown-pulse {
+    0% {
+        transform: scale(.5);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.countdown-pulse {
+    animation: countdown-pulse .6s cubic-bezier(.34, 1.56, .64, 1);
+}

@@ -46,8 +46,16 @@ export class SinglePlayerComponent implements OnInit, OnDestroy {
   // straight from a spinner into a live, already-ticking question with
   // no beat to get oriented first.
   public countdown: number = null;
+  // Toggled false then back to true on every tick (see
+  // triggerCountdownPulse()) so the pop-in animation on the countdown
+  // circle actually restarts each second - same off-then-on-next-tick
+  // trick as triggerScoreStarFlip() below, since just changing the
+  // number inside an already-present element doesn't restart a CSS
+  // animation on its own.
+  public countdownPulse: boolean = false;
   private timerHandle: any;
   private countdownHandle: any;
+  private countdownPulseHandle: any;
   private scoreStarFlipHandle: any;
 
   constructor(private router: Router, private singlePlayerApi: SinglePlayerApiService) { }
@@ -118,12 +126,15 @@ export class SinglePlayerComponent implements OnInit, OnDestroy {
   // there's no separate "party" screen to show it on in single player.
   private beginCountdown() {
     this.countdown = 3;
+    this.triggerCountdownPulse();
     this.countdownHandle = setInterval(() => {
       this.countdown--;
       if (this.countdown <= 0) {
         this.clearCountdown();
         this.startGameTimer();
+        return;
       }
+      this.triggerCountdownPulse();
     }, 1000);
   }
 
@@ -132,7 +143,24 @@ export class SinglePlayerComponent implements OnInit, OnDestroy {
       clearInterval(this.countdownHandle);
       this.countdownHandle = null;
     }
+    if (this.countdownPulseHandle) {
+      clearTimeout(this.countdownPulseHandle);
+      this.countdownPulseHandle = null;
+    }
     this.countdown = null;
+    this.countdownPulse = false;
+  }
+
+  // Same shape as triggerScoreStarFlip() below - clear the class, then
+  // re-add it on the next tick so Angular actually sees a false-then-
+  // true change and restarts the CSS animation, rather than a no-op if
+  // it were just set true again while already true.
+  private triggerCountdownPulse() {
+    if (this.countdownPulseHandle) {
+      clearTimeout(this.countdownPulseHandle);
+    }
+    this.countdownPulse = false;
+    this.countdownPulseHandle = setTimeout(() => this.countdownPulse = true);
   }
 
   // No server-anchored startedAt to reconcile against here (nothing else
