@@ -43,6 +43,16 @@
     cursor: pointer;
 }
 
+// Visually encloses the Join/Host pair as one "Multiplayer" group,
+// without needing a second page/route to actually separate them from
+// Single Player - just a label plus a dashed border/tinted panel drawn
+// around both cards.
+.multiplayer-group {
+    background: rgba(255, 255, 255, .04);
+    border: 1px dashed rgba(255, 255, 255, .15);
+    border-radius: 1.25rem;
+}
+
 .card {
     i {
         transform: scale(1);

@@ -39,7 +39,15 @@ export class SinglePlayerComponent implements OnInit, OnDestroy {
   public answerHistory: boolean[] = [];
   public resultsCopied: boolean = false;
   public scoreStarFlip: boolean = false;
+  // null outside the pre-game beat; 3/2/1 while it's running. Matches
+  // dashboard.component.ts's own 3-2-1 (beginCountdown()) before a
+  // multiplayer quiz starts - questions load instantly here since
+  // there's no server round-trip, so without this the player would go
+  // straight from a spinner into a live, already-ticking question with
+  // no beat to get oriented first.
+  public countdown: number = null;
   private timerHandle: any;
+  private countdownHandle: any;
   private scoreStarFlipHandle: any;
 
   constructor(private router: Router, private singlePlayerApi: SinglePlayerApiService) { }
@@ -50,6 +58,7 @@ export class SinglePlayerComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.clearTimer();
+    this.clearCountdown();
     if (this.scoreStarFlipHandle) {
       clearTimeout(this.scoreStarFlipHandle);
       this.scoreStarFlipHandle = null;
@@ -62,6 +71,7 @@ export class SinglePlayerComponent implements OnInit, OnDestroy {
   // a half-expired timer) from the round that just finished.
   private async startRound() {
     this.clearTimer();
+    this.clearCountdown();
     if (this.scoreStarFlipHandle) {
       clearTimeout(this.scoreStarFlipHandle);
       this.scoreStarFlipHandle = null;
@@ -90,16 +100,7 @@ export class SinglePlayerComponent implements OnInit, OnDestroy {
       this.quizQuestions = QuestionHelper.setAnswerChoices(raw);
       this.isLoaded = true;
       this.loadError = null;
-
-      // No server-anchored startedAt to reconcile against here (nothing
-      // else needs to stay in sync with this clock) - just start counting
-      // down from secondsForGame the moment questions are actually ready.
-      this.timerHandle = setInterval(() => {
-        this.secondsRemaining--;
-        if (this.secondsRemaining <= 0) {
-          this.endGame();
-        }
-      }, 1000);
+      this.beginCountdown();
     } catch (err) {
       console.error('Single player question load failed: ' + err);
       this.loadError = 'Could not load quiz questions. Please try again.';
@@ -110,6 +111,40 @@ export class SinglePlayerComponent implements OnInit, OnDestroy {
   retryLoad() {
     this.loadError = null;
     this.loadQuestions();
+  }
+
+  // Same 3-2-1 beat as dashboard.component.ts's beginCountdown(), just
+  // run locally here instead of on the dashboard before navigating -
+  // there's no separate "party" screen to show it on in single player.
+  private beginCountdown() {
+    this.countdown = 3;
+    this.countdownHandle = setInterval(() => {
+      this.countdown--;
+      if (this.countdown <= 0) {
+        this.clearCountdown();
+        this.startGameTimer();
+      }
+    }, 1000);
+  }
+
+  private clearCountdown() {
+    if (this.countdownHandle) {
+      clearInterval(this.countdownHandle);
+      this.countdownHandle = null;
+    }
+    this.countdown = null;
+  }
+
+  // No server-anchored startedAt to reconcile against here (nothing else
+  // needs to stay in sync with this clock) - just start counting down
+  // from secondsForGame once the pre-game countdown above finishes.
+  private startGameTimer() {
+    this.timerHandle = setInterval(() => {
+      this.secondsRemaining--;
+      if (this.secondsRemaining <= 0) {
+        this.endGame();
+      }
+    }, 1000);
   }
 
   checkAnswer(i: number) {

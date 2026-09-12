@@ -28,7 +28,15 @@
                   </div>
                 </div>
               }
-              @if (isLoaded && !isFinished) {
+              @if (isLoaded && countdown !== null) {
+                <div class="row">
+                  <div class="col text-center py-5">
+                    <p class="text-muted text-uppercase small font-weight-bold mb-2">Get ready…</p>
+                    <span class="h1 font-weight-bold text-primary d-block" style="font-size: 4rem;">{{countdown}}</span>
+                  </div>
+                </div>
+              }
+              @if (isLoaded && countdown === null && !isFinished) {
                 <div class="d-flex align-items-center justify-content-between mb-3 quiz-header-row">
                   <span class="badge badge-pill badge-light text-primary font-weight-bold px-3 py-2">
                     Question {{questionIndex + 1}}
