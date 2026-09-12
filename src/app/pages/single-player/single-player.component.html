@@ -5,6 +5,11 @@
         <div class="mx-auto">
           <div class="card card-stats quiz-card shadow mb-4 mb-xl-0">
             <div class="card-body">
+              @if (!isFinished && !loadError) {
+                <button type="button" class="quiz-exit-btn" aria-label="Leave quiz" (click)="backToDashboard()">
+                  <i class="fas fa-times"></i>
+                </button>
+              }
               @if (!isLoaded && !isFinished && !loadError) {
                 <div class="row">
                   <div class="col text-center py-5">
