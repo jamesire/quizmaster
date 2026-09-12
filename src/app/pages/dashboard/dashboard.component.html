@@ -240,16 +240,22 @@
 
       @if (countdown !== null) {
         <div class="text-center py-3">
-          <span class="display-3 font-weight-bold text-primary">{{ countdown > 0 ? countdown : 'Go!' }}</span>
+          <p class="text-muted text-uppercase small font-weight-bold mb-4">Get ready…</p>
+          <div class="countdown-circle mx-auto" [class.countdown-pulse]="countdownPulse" [class.countdown-circle-text]="countdown <= 0">
+            {{ countdown > 0 ? countdown : 'Go!' }}
+          </div>
         </div>
       }
     </div>
-    <div class="modal-footer">
+    <div class="modal-footer d-block">
       @if (userIsHost && countdown === null && !startingQuiz) {
-        <button type="button" class="btn btn-primary btn-block"
+        <button type="button" class="btn btn-primary btn-block" [disabled]="party.length < 2"
           (click)="startQuiz()">
           <i class="fas fa-play mr-1"></i>{{ startError ? 'Retry' : 'Start Quiz' }}
         </button>
+        @if (party.length < 2) {
+          <p class="text-muted small text-center mt-2 mb-0">Waiting for at least one more player to join…</p>
+        }
       }
     </div>
   </ng-template>

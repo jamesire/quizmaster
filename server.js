@@ -485,6 +485,16 @@ io.on('connection', socket => {
         return;
       }
 
+      if (quiz.users.length < 2) {
+        // The host is always in quiz.users from the moment they create
+        // the quiz (see the 'host' handler above), so length < 2 means
+        // nobody else has joined yet - checked server-side, not just
+        // via the client disabling its own Start Quiz button, since
+        // that's trivially bypassable (devtools, a raw socket client).
+        socket.emit('send', { action: 'error', message: 'You need at least one other player to start.' });
+        return;
+      }
+
       try {
         if (!quiz.questions) {
           quiz.questions = await getQuestionsForQuiz();
