@@ -1,0 +1,9 @@
+// The question/timer/answer-button/score-star styling is shared with
+// the multiplayer quiz screen via the second styleUrls entry
+// (../start-quiz/start-quiz.component.scss), since the markup here is
+// deliberately the same look and feel. The pre-game countdown badge
+// itself (.countdown-circle/.countdown-pulse) lives globally in
+// src/assets/scss/custom/_countdown.scss instead, since the
+// multiplayer lobby (dashboard.component.html) uses the exact same
+// badge for its own 3-2-1 - see that file for why it's global rather
+// than duplicated per component.

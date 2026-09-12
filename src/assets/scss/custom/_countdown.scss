@@ -1,0 +1,55 @@
+//
+// Pre-game countdown badge
+//
+// Shared between the multiplayer quiz lobby (dashboard.component.html's
+// party modal) and single player's pre-game beat
+// (single-player.component.html) - both show the same 3-2-1 countdown
+// before a quiz actually starts, so they use the same badge/animation
+// rather than each component styling its own. Global (not scoped to
+// either component) precisely so both can use it without duplicating
+// these rules.
+.countdown-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(87deg, #5e72e4, #825ee4);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    font-weight: 700;
+    box-shadow: 0 .75rem 1.5rem rgba(94, 114, 228, .35);
+}
+
+// Pops each number in with a slight overshoot rather than just
+// appearing - re-triggered every second by toggling this class off then
+// back on, since simply changing the number inside an already-present
+// element doesn't restart a CSS animation on its own.
+@keyframes countdown-pulse {
+    0% {
+        transform: scale(.5);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.countdown-pulse {
+    animation: countdown-pulse .6s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+// Multiplayer's countdown briefly shows "Go!" instead of a digit once
+// the count reaches 0 (in practice this frame is essentially never
+// seen - the countdown navigates away in that same tick, before
+// Angular gets a chance to render it - but it's still worth not
+// overflowing the circle if a slow device ever does render it).
+.countdown-circle-text {
+    font-size: 1.75rem;
+}

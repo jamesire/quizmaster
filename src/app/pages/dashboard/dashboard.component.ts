@@ -42,6 +42,13 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   public showSpinner = false;
   public party: string[] = [];
   public countdown: number = null;
+  // Toggled false then back to true on every tick (see
+  // triggerCountdownPulse()) so the countdown badge's pop-in animation
+  // actually restarts each second, matching single player's identical
+  // countdown treatment (single-player.component.ts) - just changing
+  // the number inside an already-present element doesn't restart a CSS
+  // animation on its own.
+  public countdownPulse: boolean = false;
   public startingQuiz: boolean = false;
   public startError: string = null;
   public joinNameError: boolean = false;
@@ -61,6 +68,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private subscription: Subscription;
   public username: string;
   private countdownHandle: any;
+  private countdownPulseHandle: any;
   private randomQuestionRetryHandle: any;
   private startRetries: number = 0;
   private startRetryHandle: any;
@@ -324,6 +332,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   // instantly.
   private beginCountdown() {
     this.countdown = 3;
+    this.triggerCountdownPulse();
 
     this.countdownHandle = setInterval(() => {
       this.countdown--;
@@ -332,7 +341,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         this.clearCountdown();
         this.modalService.dismissAll();
         this.router.navigate(['/play', QuizLinkToken.encode(this.quizId, this.username)]);
+        return;
       }
+
+      this.triggerCountdownPulse();
     }, 1000);
   }
 
@@ -341,6 +353,24 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       clearInterval(this.countdownHandle);
       this.countdownHandle = null;
     }
+    if (this.countdownPulseHandle) {
+      clearTimeout(this.countdownPulseHandle);
+      this.countdownPulseHandle = null;
+    }
+    this.countdownPulse = false;
+  }
+
+  // Same shape as single player's identical helper
+  // (single-player.component.ts) - clear the class, then re-add it on
+  // the next tick so Angular actually sees a false-then-true change and
+  // restarts the CSS animation, rather than a no-op if it were just set
+  // true again while already true.
+  private triggerCountdownPulse() {
+    if (this.countdownPulseHandle) {
+      clearTimeout(this.countdownPulseHandle);
+    }
+    this.countdownPulse = false;
+    this.countdownPulseHandle = setTimeout(() => this.countdownPulse = true);
   }
 
   joinQuiz(quizId, username) {
