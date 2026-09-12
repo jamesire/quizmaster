@@ -12,3 +12,22 @@
 .header {
     flex: 1 0 auto;
 }
+
+// A previous attempt at a logo/icon here didn't land well - this is
+// deliberately just a plain lowercase wordmark instead, doubling as a
+// link back to the dashboard from anywhere in the app (including
+// mid-quiz, replacing the standalone exit button that used to live on
+// the quiz screens themselves).
+.quizmastr-wordmark {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+    color: rgba(255, 255, 255, .85);
+    text-decoration: none;
+}
+
+.quizmastr-wordmark:hover {
+    color: #fff;
+    text-decoration: none;
+}

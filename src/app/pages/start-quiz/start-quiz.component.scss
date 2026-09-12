@@ -2,29 +2,6 @@
     cursor: pointer;
 }
 
-// Lets a player bail out mid-quiz (multiplayer or solo) back to the
-// dashboard, rather than only being able to leave once a round already
-// finished. Styled like a modal's own close button (small, muted,
-// top-right corner) rather than a prominent labelled button, so it
-// doesn't compete with the actual quiz content or invite accidental
-// taps while answering.
-.quiz-exit-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    padding: 0;
-    background: transparent;
-    border: 0;
-    color: #adb5bd;
-    font-size: 1.1rem;
-    line-height: 1;
-    transition: color .15s ease;
-}
-
-.quiz-exit-btn:hover {
-    color: #8898aa;
-}
-
 .card {
     i {
         transform: scale(1);
