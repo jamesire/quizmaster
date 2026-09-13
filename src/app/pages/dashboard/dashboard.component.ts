@@ -167,6 +167,21 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       this.prefillQuizId = qid.trim().toUpperCase();
       this.openModal(this.joinQuizModalContent);
     }
+
+    // Requests the actual ad creative for the <ins class="adsbygoogle">
+    // slot in dashboard.component.html. This has to happen here rather
+    // than as an inline <script> next to the <ins> tag the way a plain
+    // HTML page would - Angular's template compiler doesn't execute
+    // <script> tags placed in component templates, so the push() call
+    // would otherwise silently never fire and the slot would stay
+    // empty forever. Wrapped in try/catch per Google's own guidance,
+    // since push() can throw (e.g. an ad blocker having removed
+    // window.adsbygoogle's expected shape).
+    try {
+      ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+    } catch (err) {
+      console.error('AdSense request failed: ' + err);
+    }
   }
 
   ngOnDestroy() {
