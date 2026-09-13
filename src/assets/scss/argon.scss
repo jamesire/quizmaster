@@ -67,6 +67,15 @@
 @import "bootstrap/scss/tooltip";
 @import "bootstrap/scss/popover";
 @import "bootstrap/scss/carousel";
+// Bootstrap 5 also split a "Helpers" group out of the component list
+// above into its own aggregator file (bootstrap.scss's own build
+// imports it as a whole separate section, right after every
+// component and before Utilities). It's what actually defines
+// .visually-hidden, .text-bg-*, .clearfix, .stretched-link, .ratio,
+// .text-truncate and .vr - none of those existed anywhere else we'd
+// already imported, so every one of those classes was silently
+// missing until this was added.
+@import "bootstrap/scss/helpers";
 @import "bootstrap/scss/utilities";
 // Bootstrap 5 split defining utility classes (above - just builds the
 // $utilities map, emits nothing on its own) from actually generating

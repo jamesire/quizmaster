@@ -10,7 +10,7 @@
                 <div class="row">
                   <div class="col text-center py-4">
                     <div class="spinner-border spinner-border-sm text-primary" role="status">
-                      <span class="sr-only">Loading...</span>
+                      <span class="visually-hidden">Loading...</span>
                     </div>
                   </div>
                 </div>
@@ -19,9 +19,9 @@
                 <div class="row">
                   <div class="col">
                     <h5 class="card-title text-uppercase text-muted mb-0">
-                      <i class="fas fa-dice text-primary mr-1"></i>Random Trivia...
+                      <i class="fas fa-dice text-primary me-1"></i>Random Trivia...
                     </h5>
-                    <span class="h2 font-weight-bold mb-0"
+                    <span class="h2 fw-bold mb-0"
                     [ngClass]="answerIsSelected && [makeOpaque]">{{randomQuestion.question}}</span>
                   </div>
                 </div>
@@ -33,16 +33,13 @@
                   @for (answer of randomQuestion.allAnswers; track answer; let i = $index) {
                     <div class="btn-group btn-group-toggle w-50"
                       [ngClass]="answerIsSelected && [makeOpaque]">
-                      <label class="btn-primary btn-block answer-btn m-1" [ngClass]="answerIsSelected && [css[i]]"
+                      <label class="btn-primary w-100 answer-btn m-1" [ngClass]="answerIsSelected && [css[i]]"
                         (click)="checkAnswer(i)">
                         {{answer.text}}
                       </label>
                     </div>
                   }
                 </div>
-                <!-- <div class="ml-auto mr-3">
-                <button class="btn btn-sm btn-primary">Submit</button>
-              </div> -->
             </div>
           }
         </div>
@@ -60,7 +57,7 @@
           <div class="cta-icon-badge cta-icon-primary mx-auto mb-3">
             <i class="fas fa-user"></i>
           </div>
-          <h4 class="font-weight-bold mb-2">Single Player</h4>
+          <h4 class="fw-bold mb-2">Single Player</h4>
           <p class="text-muted mb-4">Answer as many questions as you can, solo.</p>
           <span class="btn btn-outline-primary btn-sm rounded-pill px-4 mb-0">Play Solo</span>
         </div>
@@ -69,8 +66,8 @@
 
     <div class="col-lg-8 col-md-7">
       <div class="multiplayer-group h-100 p-3">
-        <p class="text-uppercase text-muted small font-weight-bold mb-3 pl-1">
-          <i class="fas fa-users mr-1"></i>Multiplayer
+        <p class="text-uppercase text-muted small fw-bold mb-3 ps-1">
+          <i class="fas fa-users me-1"></i>Multiplayer
         </p>
         <div class="row">
           <div class="col mx-auto" (click)="openModal(joinQuizModal)">
@@ -79,7 +76,7 @@
                 <div class="cta-icon-badge cta-icon-success mx-auto mb-3">
                   <i class="fas fa-check-circle"></i>
                 </div>
-                <h4 class="font-weight-bold mb-2">Join a Quiz</h4>
+                <h4 class="fw-bold mb-2">Join a Quiz</h4>
                 <p class="text-muted mb-4">Got a code from your host? Jump right in.</p>
                 <span class="btn btn-outline-success btn-sm rounded-pill px-4 mb-0">Join Quiz</span>
               </div>
@@ -92,7 +89,7 @@
                 <div class="cta-icon-badge cta-icon-warning mx-auto mb-3">
                   <i class="fas fa-list-alt"></i>
                 </div>
-                <h4 class="font-weight-bold mb-2">Host a Quiz</h4>
+                <h4 class="fw-bold mb-2">Host a Quiz</h4>
                 <p class="text-muted mb-4">Play against your friends, up to 8 players.</p>
                 <span class="btn btn-outline-warning btn-sm rounded-pill px-4 mb-0">Host Quiz</span>
               </div>
@@ -105,14 +102,12 @@
   <!-- Todo: Componentise this -->
   <ng-template #joinQuizModal let-modal>
     <div class="modal-header">
-      <h4 class="modal-title" id="modal-basic-title"><i class="fas fa-check-circle text-success mr-2"></i>Join a Quiz</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-        <span aria-hidden="true">&times;</span>
-      </button>
+      <h4 class="modal-title" id="modal-basic-title"><i class="fas fa-check-circle text-success me-2"></i>Join a Quiz</h4>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
     </div>
     <div class="modal-body">
       <p class="text-muted mb-1">Enter the quiz ID from your host, then pick a name.</p>
-      <p class="text-muted small mb-3"><i class="fas fa-clock mr-1"></i>Answer as many questions as you can in 30 seconds.</p>
+      <p class="text-muted small mb-3"><i class="fas fa-clock me-1"></i>Answer as many questions as you can in 30 seconds.</p>
       <form>
         <div class="form-group">
           <label class="form-control-label">Quiz ID</label>
@@ -142,17 +137,15 @@
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-primary" (click)="joinQuiz(quizId.value, username.value)">
-        <i class="fas fa-sign-in-alt mr-1"></i>Join Quiz
+        <i class="fas fa-sign-in-alt me-1"></i>Join Quiz
       </button>
     </div>
   </ng-template>
   <!-- Todo: Componentise this -->
   <ng-template #hostQuizModal let-modal>
     <div class="modal-header">
-      <h4 class="modal-title" id="modal-basic-title"><i class="fas fa-list-alt text-warning mr-2"></i>Host a Quiz</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-        <span aria-hidden="true">&times;</span>
-      </button>
+      <h4 class="modal-title" id="modal-basic-title"><i class="fas fa-list-alt text-warning me-2"></i>Host a Quiz</h4>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
     </div>
     <div class="modal-body">
       <p class="text-muted">Answer as many questions as you can in 30 seconds.</p>
@@ -173,7 +166,7 @@
         </div>
         <div class="form-group mb-0">
           <label class="form-control-label">Difficulty</label>
-          <div class="btn-group btn-group-toggle btn-block" role="group">
+          <div class="btn-group btn-group-toggle w-100" role="group">
             @for (d of difficulties; track d; let i = $index) {
               <button type="button" class="btn"
                 [class.btn-warning]="selectedDifficulty.index === i"
@@ -188,23 +181,21 @@
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-primary" (click)="hostQuiz(hostUsername.value)">
-        <i class="fas fa-play mr-1"></i>Create Quiz
+        <i class="fas fa-play me-1"></i>Create Quiz
       </button>
     </div>
   </ng-template>
   <ng-template #showPartyModal let-modal>
     <div class="modal-header">
-      <h4 class="modal-title" id="modal-basic-title"><i class="fas fa-users text-info mr-2"></i>Quiz Lobby</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-        <span aria-hidden="true">&times;</span>
-      </button>
+      <h4 class="modal-title" id="modal-basic-title"><i class="fas fa-users text-info me-2"></i>Quiz Lobby</h4>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
     </div>
     <div class="modal-body">
       @if (countdown === null) {
         <div class="text-center mb-4">
           <p class="text-uppercase text-muted small mb-1">Quiz ID</p>
-          <span class="h2 font-weight-bold text-primary">{{quizId}}</span>
-          <button type="button" class="btn btn-link p-0 ml-2 align-baseline" (click)="copyQuizId(copyTooltip)"
+          <span class="h2 fw-bold text-primary">{{quizId}}</span>
+          <button type="button" class="btn btn-link p-0 ms-2 align-baseline" (click)="copyQuizId(copyTooltip)"
             #copyTooltip="ngbTooltip" placement="top" triggers="hover focus click" container="body"
             ngbTooltip="{{ quizIdCopied ? 'Copied!' : 'Copy' }}">
             <i class="fas fa-copy"></i>
@@ -218,8 +209,8 @@
           <ul class="list-group list-group-flush">
             @for (person of party; track person) {
               <li class="list-group-item d-flex align-items-center px-0"
-                [class.font-weight-bold]="person === username">
-                <i class="fas fa-user-circle text-muted mr-2"></i>{{person}}
+                [class.fw-bold]="person === username">
+                <i class="fas fa-user-circle text-muted me-2"></i>{{person}}
               </li>
             }
           </ul>
@@ -232,7 +223,7 @@
       @if (startingQuiz) {
         <div class="text-center py-3">
           <div class="spinner-border text-primary" role="status">
-            <span class="sr-only">Loading...</span>
+            <span class="visually-hidden">Loading...</span>
           </div>
           <p class="text-muted mt-2 mb-0">Preparing your quiz…</p>
         </div>
@@ -240,7 +231,7 @@
 
       @if (countdown !== null) {
         <div class="text-center py-3">
-          <p class="text-muted text-uppercase small font-weight-bold mb-4">Get ready…</p>
+          <p class="text-muted text-uppercase small fw-bold mb-4">Get ready…</p>
           <div class="countdown-circle mx-auto" [class.countdown-pulse]="countdownPulse" [class.countdown-circle-text]="countdown <= 0">
             {{ countdown > 0 ? countdown : 'Go!' }}
           </div>
@@ -249,9 +240,9 @@
     </div>
     <div class="modal-footer d-block">
       @if (userIsHost && countdown === null && !startingQuiz) {
-        <button type="button" class="btn btn-primary btn-block" [disabled]="party.length < 2"
+        <button type="button" class="btn btn-primary w-100" [disabled]="party.length < 2"
           (click)="startQuiz()">
-          <i class="fas fa-play mr-1"></i>{{ startError ? 'Retry' : 'Start Quiz' }}
+          <i class="fas fa-play me-1"></i>{{ startError ? 'Retry' : 'Start Quiz' }}
         </button>
         @if (party.length < 2) {
           <p class="text-muted small text-center mt-2 mb-0">Waiting for at least one more player to join…</p>
@@ -260,225 +251,3 @@
     </div>
   </ng-template>
 </div>
-<!-- <div class="row mt-5">
-<div class="col-xl-8 mb-5 mb-xl-0">
-  <div class="card shadow">
-    <div class="card-header border-0">
-      <div class="row align-items-center">
-        <div class="col">
-          <h3 class="mb-0">Page visits</h3>
-        </div>
-        <div class="col text-right">
-          <a href="#!" class="btn btn-sm btn-primary">See all</a>
-        </div>
-      </div>
-    </div>
-    <div class="table-responsive">
-      <table class="table align-items-center table-flush">
-        <thead class="thead-light">
-          <tr>
-            <th scope="col">Page name</th>
-            <th scope="col">Visitors</th>
-            <th scope="col">Unique users</th>
-            <th scope="col">Bounce rate</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row">
-              /argon/
-            </th>
-            <td>
-              4,569
-            </td>
-            <td>
-              340
-            </td>
-            <td>
-              <i class="fas fa-arrow-up text-success mr-3"></i> 46,53%
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">
-              /argon/index.html
-            </th>
-            <td>
-              3,985
-            </td>
-            <td>
-              319
-            </td>
-            <td>
-              <i class="fas fa-arrow-down text-warning mr-3"></i> 46,53%
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">
-              /argon/charts.html
-            </th>
-            <td>
-              3,513
-            </td>
-            <td>
-              294
-            </td>
-            <td>
-              <i class="fas fa-arrow-down text-warning mr-3"></i> 36,49%
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">
-              /argon/tables.html
-            </th>
-            <td>
-              2,050
-            </td>
-            <td>
-              147
-            </td>
-            <td>
-              <i class="fas fa-arrow-up text-success mr-3"></i> 50,87%
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">
-              /argon/profile.html
-            </th>
-            <td>
-              1,795
-            </td>
-            <td>
-              190
-            </td>
-            <td>
-              <i class="fas fa-arrow-down text-danger mr-3"></i> 46,53%
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-<div class="col-xl-4">
-  <div class="card shadow">
-    <div class="card-header border-0">
-      <div class="row align-items-center">
-        <div class="col">
-          <h3 class="mb-0">Social traffic</h3>
-        </div>
-        <div class="col text-right">
-          <a href="#!" class="btn btn-sm btn-primary">See all</a>
-        </div>
-      </div>
-    </div>
-    <div class="table-responsive">
-      <table class="table align-items-center table-flush">
-        <thead class="thead-light">
-          <tr>
-            <th scope="col">Referral</th>
-            <th scope="col">Visitors</th>
-            <th scope="col"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row">
-              Facebook
-            </th>
-            <td>
-              1,480
-            </td>
-            <td>
-              <div class="d-flex align-items-center">
-                <span class="mr-2">60%</span>
-                <div>
-                  <div class="progress">
-                    <div class="progress-bar bg-gradient-danger" role="progressbar" aria-valuenow="60"
-                    aria-valuemin="0" aria-valuemax="100" style="width: 60%;"></div>
-                  </div>
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">
-              Facebook
-            </th>
-            <td>
-              5,480
-            </td>
-            <td>
-              <div class="d-flex align-items-center">
-                <span class="mr-2">70%</span>
-                <div>
-                  <div class="progress">
-                    <div class="progress-bar bg-gradient-success" role="progressbar" aria-valuenow="70"
-                    aria-valuemin="0" aria-valuemax="100" style="width: 70%;"></div>
-                  </div>
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">
-              Google
-            </th>
-            <td>
-              4,807
-            </td>
-            <td>
-              <div class="d-flex align-items-center">
-                <span class="mr-2">80%</span>
-                <div>
-                  <div class="progress">
-                    <div class="progress-bar bg-gradient-primary" role="progressbar" aria-valuenow="80"
-                    aria-valuemin="0" aria-valuemax="100" style="width: 80%;"></div>
-                  </div>
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">
-              Instagram
-            </th>
-            <td>
-              3,678
-            </td>
-            <td>
-              <div class="d-flex align-items-center">
-                <span class="mr-2">75%</span>
-                <div>
-                  <div class="progress">
-                    <div class="progress-bar bg-gradient-info" role="progressbar" aria-valuenow="75"
-                    aria-valuemin="0" aria-valuemax="100" style="width: 75%;"></div>
-                  </div>
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">
-              twitter
-            </th>
-            <td>
-              2,645
-            </td>
-            <td>
-              <div class="d-flex align-items-center">
-                <span class="mr-2">30%</span>
-                <div>
-                  <div class="progress">
-                    <div class="progress-bar bg-gradient-warning" role="progressbar" aria-valuenow="30"
-                    aria-valuemin="0" aria-valuemax="100" style="width: 30%;"></div>
-                  </div>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-</div> -->
