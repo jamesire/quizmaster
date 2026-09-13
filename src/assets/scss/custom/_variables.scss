@@ -789,7 +789,13 @@ $navbar-light-border-color: $border-color !default;
 // Main content
 
 $main-content-padding-y: 40px !default;
-$main-content-padding-x: 24px !default; // in px to combine with $grid-gutter-width
+// Was 24px, in px specifically to combine with $grid-gutter-width - but
+// Bootstrap 5 changed that variable's own unit from 30px to 1.5rem, and
+// Sass can't add incompatible px+rem units at compile time. 1.5rem is
+// the same real-world size as the old 24px at the default 16px root
+// font-size (this app never overrides that), so this is a unit fix,
+// not a visual change.
+$main-content-padding-x: 1.5rem !default;
 
 
 // Alerts

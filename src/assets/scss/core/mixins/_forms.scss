@@ -19,12 +19,13 @@
 }
 
 
-// $icon is unused, same reasoning as $ignore-warning above - Bootstrap
-// 4.6's own mixin gained a third parameter (a background icon on
-// .form-control) that this override doesn't implement or need, but
-// still has to accept since Bootstrap's own _forms.scss now always
-// passes it.
-@mixin form-validation-state($state, $color, $icon: null) {
+// $icon unused since Bootstrap 4.6 (a background icon on .form-control
+// this override never implemented). Bootstrap 5's own
+// forms/_validation.scss now also passes $tooltip-color/
+// $tooltip-bg-color/$focus-box-shadow/$border-color - none used here
+// either, but all have to be accepted since Bootstrap always passes
+// them positionally via @include form-validation-state($state, $data...).
+@mixin form-validation-state($state, $color, $icon: null, $tooltip-color: null, $tooltip-bg-color: null, $focus-box-shadow: null, $border-color: null) {
   .#{$state}-feedback {
     display: none;
     width: 100%;

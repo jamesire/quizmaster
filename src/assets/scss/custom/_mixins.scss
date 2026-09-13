@@ -2,6 +2,47 @@
 // Mixins
 //
 
+// hover()/hover-focus() were both removed in Bootstrap 5 (its own
+// migration guide just says to write &:hover directly instead) - this
+// template's own mixin overrides (core/mixins/_buttons.scss,
+// _badge.scss, _background-variant.scss, core/navbars/_navbar.scss)
+// still call them in 6 places, so reinstating Bootstrap 4's original
+// implementations here keeps all of that working unchanged. Defined
+// before anything below (including Bootstrap's own mixins import) so
+// they're available everywhere downstream that needs them.
+@mixin hover {
+  &:hover { @content; }
+}
+
+@mixin hover-focus {
+  &:hover,
+  &:focus {
+    @content;
+  }
+}
+
+// text-emphasis-variant() was also removed in Bootstrap 5 (already
+// flagged by name in this app's own build warnings for a while:
+// "deprecated as of v4.4.0... removed entirely in v5") - it backs
+// every .text-{color} utility (core/utilities/_text.scss), so this one
+// isn't optional. $emphasized-link-hover-darken-percentage was
+// Bootstrap 4's own variable for this and no longer exists either;
+// 10% was its own long-standing default.
+$emphasized-link-hover-darken-percentage: 10% !default;
+
+@mixin text-emphasis-variant($parent, $color) {
+  #{$parent} {
+    color: $color !important;
+  }
+  @if $emphasized-link-hover-darken-percentage != 0 {
+    a#{$parent} {
+      @include hover-focus {
+        color: darken($color, $emphasized-link-hover-darken-percentage) !important;
+      }
+    }
+  }
+}
+
 // Bootstrap default mixins
 
 @import "bootstrap/scss/mixins";
