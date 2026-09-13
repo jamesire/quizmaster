@@ -43,6 +43,16 @@
     cursor: pointer;
 }
 
+// Centered + underlined so the label reads as a header capping the
+// whole column's width, not a caption sitting next to whichever card
+// happens to be nearest it - matters most for Multiplayer, where
+// "Join" and "Host" are two separate cards and a left-aligned label
+// read as belonging only to the one it was closest to.
+.section-label {
+    padding-bottom: .75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, .15);
+}
+
 .card {
     i {
         transform: scale(1);
