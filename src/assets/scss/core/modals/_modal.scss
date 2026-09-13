@@ -2,14 +2,16 @@
 // Modal
 //
 
-// ng-bootstrap 14's NgbModalBackdrop sets its z-index via an inline
-// style (1055) written for Bootstrap 5's z-index scale - this site is
-// still on Bootstrap 4, whose own .modal is z-index 1050 (unchanged,
-// from Bootstrap 4's $zindex-modal variable). An inline style always
-// wins over an equal-or-lower-specificity stylesheet rule regardless of
-// source order, so without this the backdrop now sits above the modal
-// window, silently blocking every click on it. !important is required
-// specifically to beat that inline style.
+// Re-checked after the Bootstrap 5 upgrade: this wasn't actually a
+// Bootstrap-version mismatch, and it's still needed. NgbModalBackdrop
+// hardcodes its z-index via an inline style equal to $zindex-modal
+// itself (1055) - the same value the modal window uses - rather than
+// Bootstrap's own $zindex-modal-backdrop (1050, one below). Two
+// elements tied at the same z-index stack by DOM order, not visual
+// intent, so without this the backdrop can end up above the modal
+// window and silently block every click on it. An inline style always
+// wins over an equal-or-lower-specificity stylesheet rule regardless
+// of source order, so !important is required to beat it.
 .modal-backdrop {
     z-index: $zindex-modal - 10 !important;
 }

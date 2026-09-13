@@ -22,14 +22,29 @@
 @import "custom/variables";
 @import "custom/mixins";
 
-// Bootstrap (4.3.0) components
+// Bootstrap (5.3.8) components
+
+// Bootstrap 5 introduced this file specifically to derive maps like
+// $theme-colors-rgb from $theme-colors - _root.scss (next) and several
+// component partials now depend on it, and it didn't exist for
+// Bootstrap 4 to need at all. Placed here (not earlier) because it
+// needs $theme-colors fully assembled - custom/variables above already
+// imports the real bootstrap/scss/variables as its own last line, so
+// everything this file reads is available by this point.
+@import "bootstrap/scss/maps";
 
 // @import "bootstrap/scss/bootstrap";
+// Five Bootstrap 4 partials this used to import no longer exist as
+// separate files in Bootstrap 5, removed rather than left dangling:
+// code (merged into reboot/type, both still imported below),
+// input-group (merged into button-group, still imported below),
+// jumbotron and media (components removed outright - unused in this
+// app; their only usages were in the Argon scaffold pages removed
+// ahead of this upgrade), print (dropped as a separate partial).
 @import "bootstrap/scss/root";
 @import "bootstrap/scss/reboot";
 @import "bootstrap/scss/type";
 @import "bootstrap/scss/images";
-@import "bootstrap/scss/code";
 @import "bootstrap/scss/grid";
 @import "bootstrap/scss/tables";
 @import "bootstrap/scss/forms";
@@ -37,27 +52,38 @@
 @import "bootstrap/scss/transitions";
 @import "bootstrap/scss/dropdown";
 @import "bootstrap/scss/button-group";
-@import "bootstrap/scss/input-group";
-@import "bootstrap/scss/custom-forms";
 @import "bootstrap/scss/nav";
 @import "bootstrap/scss/navbar";
 @import "bootstrap/scss/card";
 @import "bootstrap/scss/breadcrumb";
 @import "bootstrap/scss/pagination";
 @import "bootstrap/scss/badge";
-@import "bootstrap/scss/jumbotron";
 @import "bootstrap/scss/alert";
 @import "bootstrap/scss/progress";
 @import "bootstrap/scss/spinners";
-@import "bootstrap/scss/media";
 @import "bootstrap/scss/list-group";
 @import "bootstrap/scss/close";
 @import "bootstrap/scss/modal";
 @import "bootstrap/scss/tooltip";
 @import "bootstrap/scss/popover";
 @import "bootstrap/scss/carousel";
+// Bootstrap 5 also split a "Helpers" group out of the component list
+// above into its own aggregator file (bootstrap.scss's own build
+// imports it as a whole separate section, right after every
+// component and before Utilities). It's what actually defines
+// .visually-hidden, .text-bg-*, .clearfix, .stretched-link, .ratio,
+// .text-truncate and .vr - none of those existed anywhere else we'd
+// already imported, so every one of those classes was silently
+// missing until this was added.
+@import "bootstrap/scss/helpers";
 @import "bootstrap/scss/utilities";
-@import "bootstrap/scss/print";
+// Bootstrap 5 split defining utility classes (above - just builds the
+// $utilities map, emits nothing on its own) from actually generating
+// them - bootstrap.scss's own full build imports this separately too
+// (utilities/api, right near the end of its own import list). Without
+// it, essentially every utility class in the app (.mt-*, .text-*,
+// .d-*, .shadow, ...) would silently not exist at all.
+@import "bootstrap/scss/utilities/api";
 
 // Argon utilities and components
 

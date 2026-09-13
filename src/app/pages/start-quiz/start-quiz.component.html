@@ -10,7 +10,7 @@
                 <div class="row">
                   <div class="col text-center py-5">
                     <div class="spinner-border text-primary" role="status">
-                      <span class="sr-only">Loading...</span>
+                      <span class="visually-hidden">Loading...</span>
                     </div>
                     <p class="text-muted mt-3 mb-0">Loading questions…</p>
                   </div>
@@ -40,42 +40,36 @@
               }
               @if (isLoaded && !isFinished && !kicked) {
                 <div class="d-flex align-items-center justify-content-between mb-3 quiz-header-row">
-                  <span class="badge badge-pill badge-light text-primary font-weight-bold px-3 py-2">
+                  <span class="badge rounded-pill text-bg-light text-primary fw-bold px-3 py-2">
                     Question {{questionIndex + 1}}
                   </span>
-                  <span class="badge badge-pill px-3 py-2 font-weight-bold text-white timer-badge"
+                  <span class="badge rounded-pill px-3 py-2 fw-bold text-white timer-badge"
                     [ngClass]="secondsRemaining <= 10 ? 'bg-danger' : 'bg-warning'">
-                    <i class="fas fa-clock mr-1"></i>{{secondsRemaining}}
+                    <i class="fas fa-clock me-1"></i>{{secondsRemaining}}
                   </span>
-                  <span class="badge badge-pill badge-light font-weight-bold px-3 py-2">
-                    <i class="fas fa-star text-warning mr-1" [class.score-star-flip]="scoreStarFlip"></i>{{score}}
+                  <span class="badge rounded-pill text-bg-light fw-bold px-3 py-2">
+                    <i class="fas fa-star text-warning me-1" [class.score-star-flip]="scoreStarFlip"></i>{{score}}
                   </span>
                 </div>
                 <div class="row">
                   <div class="col">
-                    <span class="h2 font-weight-bold mb-0"
+                    <span class="h2 fw-bold mb-0"
                     [ngClass]="answerIsSelected && [makeOpaque]">{{quizQuestions[questionIndex].question}}</span>
                   </div>
                 </div>
                 <div class="row mt-2">
                   <div class="col">
-                    <!-- <p class="mb-0 text-muted text-sm">
-                    <span class="text-nowrap">Answers/input down here maybe?</span>
-                  </p> -->
                   @for (answer of quizQuestions[questionIndex].allAnswers; track answer; let i = $index) {
                     <div
                       class="btn-group btn-group-toggle w-50"
                       [ngClass]="answerIsSelected && [makeOpaque]">
-                      <label class="btn-primary btn-block answer-btn m-1" [ngClass]="answerIsSelected && [css[i]]"
+                      <label class="btn-primary w-100 answer-btn m-1" [ngClass]="answerIsSelected && [css[i]]"
                         (click)="checkAnswer(i)">
                         {{answer.text}}
                       </label>
                     </div>
                   }
                 </div>
-                <!-- <div class="ml-auto mr-3">
-                <button class="btn btn-sm btn-primary">Submit</button>
-              </div> -->
             </div>
           }
           @if (isFinished && !kicked) {
@@ -83,36 +77,36 @@
               <div class="col text-center">
                 <h5 class="card-title text-uppercase text-muted mb-1">Time's up!</h5>
                 <p class="text-muted mb-4">Here's how everyone did</p>
-                <ul class="list-group list-group-flush text-left mb-4 leaderboard-list">
+                <ul class="list-group list-group-flush text-start mb-4 leaderboard-list">
                   @for (person of getSortedParty(); track person; let i = $index) {
                     <li class="list-group-item d-flex align-items-center px-0"
-                      [class.font-weight-bold]="person === username">
-                      <span class="rank-badge mr-3" [ngClass]="i === 0 ? 'bg-warning' : 'rank-badge-default'">{{i + 1}}</span>
-                      <i class="fas fa-user-circle text-muted mr-2"></i>
+                      [class.fw-bold]="person === username">
+                      <span class="rank-badge me-3" [ngClass]="i === 0 ? 'bg-warning' : 'rank-badge-default'">{{i + 1}}</span>
+                      <i class="fas fa-user-circle text-muted me-2"></i>
                       <span class="flex-grow-1">{{person}}@if (person === username) {
-                        <span class="text-muted font-weight-normal"> (you)</span>
+                        <span class="text-muted fw-normal"> (you)</span>
                       }</span>
-                      <span class="badge badge-pill badge-primary px-3 py-2">
+                      <span class="badge rounded-pill text-bg-primary px-3 py-2">
                         {{ scores[person] !== undefined ? scores[person] : 'Still playing…' }}
                       </span>
                       @if (sessionWins[person]) {
-                        <span class="badge badge-pill badge-warning px-2 py-1 ml-2">
-                          <i class="fas fa-trophy mr-1"></i>{{ sessionWins[person] }}
+                        <span class="badge rounded-pill text-bg-warning px-2 py-1 ms-2">
+                          <i class="fas fa-trophy me-1"></i>{{ sessionWins[person] }}
                         </span>
                       }
                     </li>
                   }
                 </ul>
-                <button type="button" class="btn btn-outline-primary mr-2" (click)="copyResults(resultsTooltip)"
+                <button type="button" class="btn btn-outline-primary me-2" (click)="copyResults(resultsTooltip)"
                   #resultsTooltip="ngbTooltip" placement="top" triggers="hover focus click" container="body"
                   ngbTooltip="{{ resultsCopied ? 'Copied!' : 'Copy results' }}">
-                  <i class="fas fa-copy mr-1"></i>Copy results
+                  <i class="fas fa-copy me-1"></i>Copy results
                 </button>
                 <button type="button" class="btn btn-primary" (click)="backToDashboard()">Dashboard</button>
                 @if (replayWindowOpen && !replayClosed) {
                   <div class="mt-3">
                     <button type="button" class="btn btn-success mb-2" [disabled]="hasVotedReplay" (click)="voteReplay()">
-                      <i class="fas fa-redo mr-1"></i>{{ hasVotedReplay ? 'Waiting for others…' : 'Replay' }}
+                      <i class="fas fa-redo me-1"></i>{{ hasVotedReplay ? 'Waiting for others…' : 'Replay' }}
                     </button>
                     <p class="text-muted small mb-0">
                       {{ replayVotesList.length }} of {{ partyList.length }} voted to replay &middot; {{ replaySecondsRemaining }}s left
