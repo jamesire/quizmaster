@@ -59,16 +59,16 @@
                 </div>
                 <div class="row mt-2">
                   <div class="col">
-                    @for (answer of quizQuestions[questionIndex].allAnswers; track answer; let i = $index) {
-                      <div
-                        class="btn-group btn-group-toggle w-50"
-                        [ngClass]="answerIsSelected && [makeOpaque]">
-                        <label class="btn-primary w-100 answer-btn m-1" [ngClass]="answerIsSelected && [css[i]]"
-                          (click)="checkAnswer(i)">
-                          {{answer.text}}
-                        </label>
-                      </div>
-                    }
+                    <div class="row g-2" [ngClass]="answerIsSelected && [makeOpaque]">
+                      @for (answer of quizQuestions[questionIndex].allAnswers; track answer; let i = $index) {
+                        <div class="col-12 col-sm-6">
+                          <label class="btn-primary w-100 answer-btn" [ngClass]="answerIsSelected && [css[i]]"
+                            (click)="checkAnswer(i)">
+                            {{answer.text}}
+                          </label>
+                        </div>
+                      }
+                    </div>
                   </div>
                 </div>
               }
