@@ -43,14 +43,29 @@
     cursor: pointer;
 }
 
-// Centered + underlined so the label reads as a header capping the
-// whole column's width, not a caption sitting next to whichever card
-// happens to be nearest it - matters most for Multiplayer, where
-// "Join" and "Host" are two separate cards and a left-aligned label
-// read as belonging only to the one it was closest to.
+// Underlined so the label reads as a header capping the whole
+// column's width, not a caption sitting next to whichever card
+// happens to be nearest it - matters on tablet/desktop, where "Join"
+// and "Host" sit side by side (col-sm-6) and a text-width label read
+// as belonging only to whichever one it was closest to.
+//
+// On mobile Join/Host stack instead (col-12), so there's no
+// side-by-side ambiguity to fix - a full-width rule there would just
+// be a stray line stretching under whitespace, wider than the label
+// needs. inline-block below 576px (Bootstrap's $sm) shrinks the
+// underline back down to the label's own width; the media query
+// switches it to block (full column width) at sm and up, matching
+// the col-sm-6 breakpoint where Join/Host actually go side by side.
 .section-label {
+    display: inline-block;
     padding-bottom: .75rem;
     border-bottom: 1px solid rgba(255, 255, 255, .15);
+}
+
+@media (min-width: 576px) {
+    .section-label {
+        display: block;
+    }
 }
 
 .card {
