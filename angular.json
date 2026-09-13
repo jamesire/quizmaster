@@ -31,9 +31,7 @@
               "src/styles.scss",
               "src/assets/scss/argon.scss"
             ],
-            "scripts": [
-              "node_modules/clipboard/dist/clipboard.min.js"
-            ],
+            "scripts": [],
             "aot": false,
             "vendorChunk": true,
             "extractLicenses": false,
