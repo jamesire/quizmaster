@@ -7,6 +7,36 @@
 @import "bootstrap/scss/functions";
 
 
+// theme-color()/color-yiq() were both removed outright in Bootstrap 5
+// (replaced by a different, CSS-variable-driven color-mode system this
+// app doesn't use) - this whole Argon template still calls both of
+// them in ~35 places across custom/_variables.scss and several
+// core/*.scss partials. Rather than rewriting every call site,
+// reinstating Bootstrap 4's own original implementations here (as
+// plain functions, not relying on anything Bootstrap 5 removed) keeps
+// all of that code working unchanged. $theme-colors/$yiq-* below are
+// still defined further down in custom/_variables.scss exactly as
+// before - Sass only evaluates a function's body when it's actually
+// *called*, not when it's defined, so this ordering is safe.
+@function theme-color($key: "primary") {
+	@return map-get($theme-colors, $key);
+}
+
+@function color-yiq($color, $dark: $yiq-text-dark, $light: $yiq-text-light) {
+	$r: red($color);
+	$g: green($color);
+	$b: blue($color);
+
+	$yiq: (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+
+	@if ($yiq >= $yiq-contrasted-threshold) {
+		@return $dark;
+	} @else {
+		@return $light;
+	}
+}
+
+
 // Retrieve color Sass maps
 
 @function section-color($key: "primary") {

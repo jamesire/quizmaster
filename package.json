@@ -23,7 +23,7 @@
     "@angular/router": "22.1.6",
     "@ng-bootstrap/ng-bootstrap": "^21.0.0",
     "@popperjs/core": "^2.11.8",
-    "bootstrap": "^4.6.2",
+    "bootstrap": "5.2.3",
     "clipboard": "2.0.4",
     "core-js": "3.6.4",
     "cors": "^2.8.5",
