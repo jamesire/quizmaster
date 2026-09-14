@@ -55,3 +55,21 @@ ins.adsbygoogle {
     outline-offset: -2px;
     background: rgba(255, 0, 0, 0.06);
 }
+
+// Defensive belt-and-suspenders, not the actual fix for the mobile
+// x-scroll bug reported - that turned out to be the ad's own .row
+// wrapper's negative margins going uncompensated one level too deep
+// in the DOM (removed in each template instead, see the "mt-4
+// text-center" divs replacing the old row/col there). This just
+// guards against any future width-rounding edge case from Google's
+// own sizing script on top of that real fix, permanently (not tied to
+// the temporary debug outline above).
+// overflow:hidden because Google's script sizes the ad's inner
+// wrapper div/iframe with their own explicit inline width, which
+// doesn't automatically shrink to respect max-width on this outer
+// <ins> - clipping it here is the standard defensive pattern rather
+// than fighting a script-set inline width directly.
+ins.adsbygoogle {
+    max-width: 100%;
+    overflow: hidden;
+}
