@@ -73,3 +73,17 @@ ins.adsbygoogle {
     max-width: 100%;
     overflow: hidden;
 }
+
+// <ins> is display:block (set inline by the ad snippet itself), so
+// the surrounding text-center wrapper's text-align never actually
+// centered it - text-align only centers inline/inline-block content,
+// not a block-level child's own box. Not visible on desktop, where
+// the ad's measured width happened to match its container's, but
+// clearly left-aligned wherever Google picks a narrower width (e.g.
+// the "horizontal" format on some mobile widths). margin:auto only
+// centers a block element with a width narrower than its container,
+// so this is a no-op whenever the ad does fill the full width.
+ins.adsbygoogle {
+    margin-left: auto;
+    margin-right: auto;
+}
