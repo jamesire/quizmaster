@@ -43,8 +43,15 @@ app-root, app-admin-layout {
 // big it is, without changing layout/sizing at all (border is drawn
 // inside the element's existing box via outline, not an added border
 // that would shift anything).
+// !important on outline specifically because AdSense's own script
+// inline-sets "outline: none" on the <ins> tag at some viewport
+// widths (observed on mobile, not on the desktop widths tested first)
+// - a plain stylesheet rule loses to that regardless of this rule's
+// own specificity, since inline styles win over stylesheet rules by
+// default. Confirmed by reading the actual injected inline style
+// attribute in a real mobile-width browser session, not assumed.
 ins.adsbygoogle {
-    outline: 2px dashed red;
+    outline: 2px dashed red !important;
     outline-offset: -2px;
     background: rgba(255, 0, 0, 0.06);
 }
