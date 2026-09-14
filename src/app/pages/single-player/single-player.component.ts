@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterViewInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { SinglePlayerApiService, RawQuestion } from 'src/app/quizmaster-api-client/single-player-api.service';
 import { Question } from 'src/app/models/Question';
@@ -23,7 +23,7 @@ import { ClipboardHelper } from 'src/app/models/ClipboardHelper';
   changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
-export class SinglePlayerComponent implements OnInit, OnDestroy {
+export class SinglePlayerComponent implements OnInit, OnDestroy, AfterViewInit {
   public readonly secondsForGame: number = 30;
   public secondsRemaining: number = this.secondsForGame;
   public questionIndex: number = 0;
@@ -62,6 +62,19 @@ export class SinglePlayerComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.startRound();
+  }
+
+  ngAfterViewInit() {
+    // Requests the actual ad creative for the <ins class="adsbygoogle">
+    // slot below the quiz card in single-player.component.html - see
+    // dashboard.component.ts's identical ngAfterViewInit for why this
+    // has to happen here rather than as an inline <script> next to the
+    // <ins> tag (Angular templates don't execute inline scripts).
+    try {
+      ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+    } catch (err) {
+      console.error('AdSense request failed: ' + err);
+    }
   }
 
   ngOnDestroy() {

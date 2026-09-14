@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PartyMemberService } from 'src/app/party-member/party-member.service';
@@ -15,7 +15,7 @@ import { QuizLinkToken } from 'src/app/models/QuizLinkToken';
     standalone: false
 })
 
-export class StartQuizComponent implements OnInit, OnDestroy {
+export class StartQuizComponent implements OnInit, OnDestroy, AfterViewInit {
   // One 30-second clock for the whole quiz, not per question - matches
   // the "quick-fire quiz... time limit is 30 seconds" pitch on the
   // hosting modal (whole-session limit, just at 30s per the user's
@@ -221,6 +221,19 @@ export class StartQuizComponent implements OnInit, OnDestroy {
     this.username = decoded.username;
 
     this.partyMemberService.getQuestions(this.quizId, this.username);
+  }
+
+  ngAfterViewInit() {
+    // Requests the actual ad creative for the <ins class="adsbygoogle">
+    // slot below the quiz card in start-quiz.component.html - see
+    // dashboard.component.ts's identical ngAfterViewInit for why this
+    // has to happen here rather than as an inline <script> next to the
+    // <ins> tag (Angular templates don't execute inline scripts).
+    try {
+      ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+    } catch (err) {
+      console.error('AdSense request failed: ' + err);
+    }
   }
 
   ngOnDestroy() {

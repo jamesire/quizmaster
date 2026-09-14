@@ -1,1 +1,50 @@
 /* You can add global styles to this file, and also import other style files */
+
+// Sticky-footer chain, part 1 of 2 (part 2 is .main-content in
+// admin-layout.component.scss). The actual page-height floor lives
+// here on html/body rather than on .main-content, where it used to
+// be - AdSense's own full-width-responsive ad script walks up from
+// its <ins> tag and forcibly zeroes out (inline style, !important)
+// the height/min-height of the first ancestor it finds with either
+// set, to make sure nothing constrains its own width/height
+// calculation. That used to be .main-content itself, which broke the
+// flex sticky-footer trick there outright on any page with an ad on
+// it - confirmed by inspecting the actual injected inline style in a
+// real browser, not just reading the CSS. AdSense's walk stops once
+// it finds and neutralizes that first constraint, so it never
+// actually reaches html/body - putting the real height floor here
+// instead survives it. app-root/app-admin-layout just relay the
+// stretch down the chain via flex, not an explicit height of their
+// own, so there's nothing here for AdSense's walk to find and zero
+// out even if it kept going past .main-content.
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+app-root, app-admin-layout {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+// TEMPORARY - remove once ad placement no longer needs eyeballing
+// (e.g. once the AdSense account is approved and slots are actually
+// showing real creative, or sooner if this stops being useful).
+// Every ad unit is unfilled while the account's in review, so its
+// reserved space is otherwise invisible - this just outlines that
+// reserved space in red so it's obvious where each one sits and how
+// big it is, without changing layout/sizing at all (border is drawn
+// inside the element's existing box via outline, not an added border
+// that would shift anything).
+ins.adsbygoogle {
+    outline: 2px dashed red;
+    outline-offset: -2px;
+    background: rgba(255, 0, 0, 0.06);
+}
