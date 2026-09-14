@@ -34,28 +34,6 @@ app-root, app-admin-layout {
     min-height: 0;
 }
 
-// TEMPORARY - remove once ad placement no longer needs eyeballing
-// (e.g. once the AdSense account is approved and slots are actually
-// showing real creative, or sooner if this stops being useful).
-// Every ad unit is unfilled while the account's in review, so its
-// reserved space is otherwise invisible - this just outlines that
-// reserved space in red so it's obvious where each one sits and how
-// big it is, without changing layout/sizing at all (border is drawn
-// inside the element's existing box via outline, not an added border
-// that would shift anything).
-// !important on outline specifically because AdSense's own script
-// inline-sets "outline: none" on the <ins> tag at some viewport
-// widths (observed on mobile, not on the desktop widths tested first)
-// - a plain stylesheet rule loses to that regardless of this rule's
-// own specificity, since inline styles win over stylesheet rules by
-// default. Confirmed by reading the actual injected inline style
-// attribute in a real mobile-width browser session, not assumed.
-ins.adsbygoogle {
-    outline: 2px dashed red !important;
-    outline-offset: -2px;
-    background: rgba(255, 0, 0, 0.06);
-}
-
 // Defensive belt-and-suspenders, not the actual fix for the mobile
 // x-scroll bug reported - that turned out to be the ad's own .row
 // wrapper's negative margins going uncompensated one level too deep
