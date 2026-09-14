@@ -33,3 +33,18 @@ app-root, app-admin-layout {
     flex: 1;
     min-height: 0;
 }
+
+// TEMPORARY - remove once ad placement no longer needs eyeballing
+// (e.g. once the AdSense account is approved and slots are actually
+// showing real creative, or sooner if this stops being useful).
+// Every ad unit is unfilled while the account's in review, so its
+// reserved space is otherwise invisible - this just outlines that
+// reserved space in red so it's obvious where each one sits and how
+// big it is, without changing layout/sizing at all (border is drawn
+// inside the element's existing box via outline, not an added border
+// that would shift anything).
+ins.adsbygoogle {
+    outline: 2px dashed red;
+    outline-offset: -2px;
+    background: rgba(255, 0, 0, 0.06);
+}
