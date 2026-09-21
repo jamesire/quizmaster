@@ -1,0 +1,20 @@
+.content-card {
+    border-radius: 1rem;
+    border: none;
+}
+
+.legal-copy {
+    h2 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin-top: 2rem;
+
+        &:first-child {
+            margin-top: 0;
+        }
+    }
+
+    p, li {
+        color: #525f7f;
+    }
+}

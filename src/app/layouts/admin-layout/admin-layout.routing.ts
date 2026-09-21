@@ -4,9 +4,13 @@ import { DashboardComponent } from '../../pages/dashboard/dashboard.component';
 import { JoinQuizComponent } from 'src/app/pages/join-quiz/join-quiz.component';
 import { StartQuizComponent } from 'src/app/pages/start-quiz/start-quiz.component';
 import { SinglePlayerComponent } from 'src/app/pages/single-player/single-player.component';
+import { AboutComponent } from 'src/app/pages/about/about.component';
+import { PrivacyPolicyComponent } from 'src/app/pages/privacy-policy/privacy-policy.component';
 
 export const AdminLayoutRoutes: Routes = [
     { path: '',               component: DashboardComponent },
     { path: 'play/:token',    component: StartQuizComponent },
-    { path: 'solo',           component: SinglePlayerComponent }
+    { path: 'solo',           component: SinglePlayerComponent },
+    { path: 'about',          component: AboutComponent },
+    { path: 'privacy',        component: PrivacyPolicyComponent }
 ];
