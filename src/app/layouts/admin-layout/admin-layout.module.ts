@@ -10,11 +10,15 @@ import { AdminLayoutRoutes } from './admin-layout.routing';
 import { DashboardComponent } from '../../pages/dashboard/dashboard.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from 'src/app/modal/modal.component';
+import { AboutComponent } from 'src/app/pages/about/about.component';
+import { PrivacyPolicyComponent } from 'src/app/pages/privacy-policy/privacy-policy.component';
 
 @NgModule({
   declarations: [
     ModalComponent,
-    DashboardComponent
+    DashboardComponent,
+    AboutComponent,
+    PrivacyPolicyComponent
   ],
   imports: [
     CommonModule,
